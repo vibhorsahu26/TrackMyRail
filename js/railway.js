@@ -19,11 +19,17 @@ function initializeRailway() {
 
     renderTrains();
 
-    renderTracks();
+    // renderTracks();
 
     updateTrackStatus();
 
     updateAIDecisionUI();
+
+    updateWhatIfUI();
+
+    initializeScenarioSelection();
+
+    initializeScenarioActions();
 
     initializeRailwayInteractions();
 
@@ -582,6 +588,258 @@ function generateDecision() {
     };
 
 }
+function simulateScenario(scenario) {
+
+    const trains = Object.values(railwayState.trains);
+
+    const train12951 = railwayState.trains["12951"];
+    const train54821 = railwayState.trains["54821"];
+
+
+    /*
+     * Prototype simulation constants.
+     *
+     * These are NOT real railway operational values.
+     * They represent the assumptions of our demo model.
+     */
+
+    const CROSSING_PENALTY = 16;
+    const HOLD_BOTH_PENALTY = 7;
+
+
+    let totalDelay = 0;
+    let conflicts = 0;
+    let stops = 0;
+
+
+    // ============================================
+    // SCENARIO 1
+    // HIGH PRIORITY TRAIN FIRST
+    // ============================================
+
+    if (scenario === "12951_FIRST") {
+
+        totalDelay =
+            train12951.delay +
+            train54821.delay;
+
+        conflicts = 1;
+
+        stops = 1;
+
+    }
+
+
+    // ============================================
+    // SCENARIO 2
+    // FREIGHT TRAIN FIRST
+    // ============================================
+
+    if (scenario === "54821_FIRST") {
+
+        totalDelay =
+            train12951.delay +
+            train54821.delay +
+            CROSSING_PENALTY;
+
+        conflicts = 2;
+
+        stops = 2;
+
+    }
+
+
+    // ============================================
+    // SCENARIO 3
+    // HOLD BOTH
+    // ============================================
+
+    if (scenario === "HOLD_BOTH") {
+
+        totalDelay =
+            Math.max(
+                train12951.delay,
+                train54821.delay
+            ) +
+            HOLD_BOTH_PENALTY;
+
+        conflicts = 1;
+
+        stops = 2;
+
+    }
+
+
+    return {
+
+        scenario,
+
+        totalDelay,
+
+        conflicts,
+
+        stops
+
+    };
+
+}
+function calculateWhatIfAnalysis() {
+
+    const scenarios = [
+
+        simulateScenario("12951_FIRST"),
+
+        simulateScenario("54821_FIRST"),
+
+        simulateScenario("HOLD_BOTH")
+
+    ];
+
+
+    /*
+     * Lowest total delay wins.
+     */
+
+    const recommended =
+        scenarios.reduce(
+            (best, current) =>
+                current.totalDelay < best.totalDelay
+                    ? current
+                    : best
+        );
+
+
+    return {
+
+        scenarios,
+
+        recommended: recommended.scenario
+
+    };
+
+}
+function updateWhatIfUI() {
+
+    const analysis =
+        calculateWhatIfAnalysis();
+
+
+    const scenario1 =
+        analysis.scenarios.find(
+            scenario =>
+                scenario.scenario === "12951_FIRST"
+        );
+
+
+    const scenario2 =
+        analysis.scenarios.find(
+            scenario =>
+                scenario.scenario === "54821_FIRST"
+        );
+
+
+    const scenario3 =
+        analysis.scenarios.find(
+            scenario =>
+                scenario.scenario === "HOLD_BOTH"
+        );
+
+
+    // ============================================
+    // SCENARIO 1
+    // ============================================
+
+    document.getElementById(
+        "scenario1Delay"
+    ).textContent =
+        `${scenario1.totalDelay} min`;
+
+
+    document.getElementById(
+        "scenario1Conflicts"
+    ).textContent =
+        scenario1.conflicts;
+
+
+    document.getElementById(
+        "scenario1Stops"
+    ).textContent =
+        scenario1.stops;
+
+
+    // ============================================
+    // SCENARIO 2
+    // ============================================
+
+    document.getElementById(
+        "scenario2Delay"
+    ).textContent =
+        `${scenario2.totalDelay} min`;
+
+
+    document.getElementById(
+        "scenario2Conflicts"
+    ).textContent =
+        scenario2.conflicts;
+
+
+    document.getElementById(
+        "scenario2Stops"
+    ).textContent =
+        scenario2.stops;
+
+
+    // ============================================
+    // SCENARIO 3
+    // ============================================
+
+    document.getElementById(
+        "scenario3Delay"
+    ).textContent =
+        `${scenario3.totalDelay} min`;
+
+
+    document.getElementById(
+        "scenario3Conflicts"
+    ).textContent =
+        scenario3.conflicts;
+
+
+    document.getElementById(
+        "scenario3Stops"
+    ).textContent =
+        scenario3.stops;
+
+
+    // ============================================
+    // UPDATE RECOMMENDATION BADGE
+    // ============================================
+
+    const badge =
+        document.getElementById(
+            "scenario1Badge"
+        );
+
+
+    if (
+        analysis.recommended ===
+        "12951_FIRST"
+    ) {
+
+        badge.textContent =
+            "RECOMMENDED";
+
+    } else {
+
+        badge.textContent =
+            "";
+
+    }
+
+
+    return analysis;
+
+}
 function updateAIDecisionUI() {
 
     const decision = generateDecision();
@@ -776,3 +1034,419 @@ console.log("Railway Conflict Analysis:");
 console.log(decision);
 
 updateAIDecisionUI();
+
+let selectedScenario = "12951_FIRST";
+
+function initializeScenarioSelection() {
+
+    const scenarioCards =
+        document.querySelectorAll(
+            ".scenario-card"
+        );
+
+    const selectedScenarioText =
+        document.getElementById(
+            "selectedScenarioText"
+        );
+
+
+    scenarioCards.forEach(card => {
+
+        card.addEventListener("click", () => {
+
+            scenarioCards.forEach(item => {
+
+                item.classList.remove(
+                    "selected"
+                );
+
+            });
+
+
+            card.classList.add("selected");
+
+
+            selectedScenario =
+                card.dataset.scenario;
+
+
+            const title =
+                card.querySelector(
+                    ".scenario-header strong"
+                );
+
+
+            if (title) {
+
+                selectedScenarioText.textContent =
+                    title.textContent;
+
+            }
+
+        });
+
+    });
+
+
+    // Select first scenario initially
+
+    const firstCard =
+        document.querySelector(
+            `[data-scenario="${selectedScenario}"]`
+        );
+
+
+    if (firstCard) {
+
+        firstCard.classList.add(
+            "selected"
+        );
+
+    }
+
+}
+
+function applySelectedScenario() {
+
+    const scenario =
+        selectedScenario;
+
+
+    const train12951 =
+        railwayState.trains["12951"];
+
+    const train54821 =
+        railwayState.trains["54821"];
+
+
+    // ==========================================
+    // 12951 FIRST
+    // ==========================================
+
+    if (scenario === "12951_FIRST") {
+
+        train12951.status =
+            "running";
+
+        train54821.status =
+            "hold";
+
+        train54821.track =
+            "T2";
+
+        console.log(
+            "Scenario applied: 12951 First"
+        );
+
+    }
+
+
+    // ==========================================
+    // 54821 FIRST
+    // ==========================================
+
+    if (scenario === "54821_FIRST") {
+
+        train54821.status =
+            "running";
+
+        train12951.status =
+            "hold";
+
+        train12951.track =
+            "T2";
+
+        console.log(
+            "Scenario applied: 54821 First"
+        );
+
+    }
+
+
+    // ==========================================
+    // HOLD BOTH
+    // ==========================================
+
+    if (scenario === "HOLD_BOTH") {
+
+        train12951.status =
+            "hold";
+
+        train54821.status =
+            "hold";
+
+        console.log(
+            "Scenario applied: Hold Both"
+        );
+
+    }
+
+
+    /*
+     * Recalculate everything after applying
+     * the scenario.
+     */
+
+    updateTrainVisuals();
+
+    updateAIDecisionUI();
+
+    updateWhatIfUI();
+
+
+    alert(
+        `Scenario applied successfully: ${scenario}`
+    );
+
+}
+
+function initializeScenarioActions() {
+
+    const button =
+        document.getElementById(
+            "applyScenarioButton"
+        );
+
+
+    if (!button) return;
+
+
+    button.addEventListener(
+        "click",
+        applySelectedScenario
+    );
+
+}
+
+function applySelectedScenario() {
+
+    const train12951 =
+        railwayState.trains["12951"];
+
+    const train54821 =
+        railwayState.trains["54821"];
+
+
+    if (selectedScenario === "12951_FIRST") {
+
+        train12951.status = "running";
+        train54821.status = "hold";
+        train54821.track = "T2";
+
+    }
+
+
+    if (selectedScenario === "54821_FIRST") {
+
+        train54821.status = "running";
+        train12951.status = "hold";
+        train12951.track = "T2";
+
+    }
+
+
+    if (selectedScenario === "HOLD_BOTH") {
+
+        train12951.status = "hold";
+        train54821.status = "hold";
+
+    }
+
+
+    renderTrains();
+
+    updateAIDecisionUI();
+
+    updateWhatIfUI();
+
+}
+
+// ============================================
+// WHAT-IF SCENARIO ACTIONS
+// ============================================
+
+function initializeScenarioActions() {
+
+    const scenarioCards =
+        document.querySelectorAll(".scenario-card");
+
+    const applyButton =
+        document.getElementById("applyScenarioButton");
+
+    const selectedScenarioText =
+        document.getElementById("selectedScenarioText");
+
+
+    // --------------------------------------------
+    // Scenario card selection
+    // --------------------------------------------
+
+    scenarioCards.forEach(card => {
+
+        card.addEventListener("click", () => {
+
+            scenarioCards.forEach(item => {
+                item.classList.remove("selected");
+            });
+
+            card.classList.add("selected");
+
+            selectedScenario =
+                card.dataset.scenario;
+
+            const title =
+                card.querySelector(
+                    ".scenario-header strong"
+                );
+
+            if (title && selectedScenarioText) {
+
+                selectedScenarioText.textContent =
+                    title.textContent.trim();
+
+            }
+
+            console.log(
+                "Selected scenario:",
+                selectedScenario
+            );
+
+        });
+
+    });
+
+
+    // --------------------------------------------
+    // Select first scenario initially
+    // --------------------------------------------
+
+    const firstCard =
+        document.querySelector(
+            `[data-scenario="${selectedScenario}"]`
+        );
+
+    if (firstCard) {
+
+        firstCard.classList.add("selected");
+
+    }
+
+
+    // --------------------------------------------
+    // Apply button
+    // --------------------------------------------
+
+    if (!applyButton) {
+
+        console.error(
+            "Apply Scenario button not found."
+        );
+
+        return;
+
+    }
+
+
+    applyButton.addEventListener(
+        "click",
+        applySelectedScenario
+    );
+
+
+    console.log(
+        "Scenario actions initialized."
+    );
+
+
+}
+
+function applySelectedScenario() {
+
+    console.log(
+        "Applying scenario:",
+        selectedScenario
+    );
+
+
+    const train12951 =
+        railwayState.trains["12951"];
+
+    const train54821 =
+        railwayState.trains["54821"];
+
+
+    if (!train12951 || !train54821) {
+
+        console.error(
+            "Required trains not found in railwayState."
+        );
+
+        return;
+
+    }
+
+
+    // ==========================================
+    // SCENARIO 1
+    // ==========================================
+
+    if (selectedScenario === "12951_FIRST") {
+
+        train12951.status = "running";
+        train54821.status = "hold";
+
+        console.log(
+            "12951 running | 54821 hold"
+        );
+
+    }
+
+
+    // ==========================================
+    // SCENARIO 2
+    // ==========================================
+
+    else if (selectedScenario === "54821_FIRST") {
+
+        train12951.status = "hold";
+        train54821.status = "running";
+
+        console.log(
+            "12951 hold | 54821 running"
+        );
+
+    }
+
+
+    // ==========================================
+    // SCENARIO 3
+    // ==========================================
+
+    else if (selectedScenario === "HOLD_BOTH") {
+
+        train12951.status = "hold";
+        train54821.status = "hold";
+
+        console.log(
+            "12951 hold | 54821 hold"
+        );
+
+    }
+
+
+    // ==========================================
+    // REDRAW UI
+    // ==========================================
+
+    renderTrains();
+
+    updateAIDecisionUI();
+
+    updateWhatIfUI();
+
+
+    console.log(
+        "Scenario applied successfully."
+    );
+
+}

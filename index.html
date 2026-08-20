@@ -935,19 +935,37 @@
 
                 <div class="scenario-grid">
 
+                    <div class="scenario-actions">
+
+                        <div class="selected-scenario">
+
+                            <span>Selected Scenario</span>
+
+                            <strong id="selectedScenarioText">
+                                Scenario 1: 12951 First
+                            </strong>
+
+                        </div>
+
+                        <button id="applyScenarioButton" class="primary-button">
+                            <i data-lucide="play"></i>
+                            Apply Scenario
+                        </button>
+
+                    </div>
 
                     <!-- SCENARIO 1 -->
 
-                    <article class="scenario-card recommended">
+                    <article class="scenario-card recommended" data-scenario="12951_FIRST">
 
 
                         <div class="scenario-header">
 
-                            <strong>
+                            <strong id="scenario1Title">
                                 Scenario 1: 12951 First
                             </strong>
 
-                            <span>
+                            <span id="scenario1Badge">
                                 RECOMMENDED
                             </span>
 
@@ -964,7 +982,7 @@
                                     Total Delay
                                 </span>
 
-                                <strong class="success">
+                                <strong class="success" id="scenario1Delay">
                                     14 min
                                 </strong>
 
@@ -977,7 +995,7 @@
 
                                     Conflicts
 
-                                    <b>
+                                    <b id="scenario1Conflicts">
                                         1
                                     </b>
 
@@ -988,7 +1006,7 @@
 
                                     Stops
 
-                                    <b>
+                                    <b id="scenario1Stops">
                                         1
                                     </b>
 
@@ -1016,12 +1034,12 @@
 
                     <!-- SCENARIO 2 -->
 
-                    <article class="scenario-card">
+                    <article class="scenario-card" data-scenario="54821_FIRST">
 
 
                         <div class="scenario-header">
 
-                            <strong>
+                            <strong id="scenario2Title">
                                 Scenario 2: 54821 First
                             </strong>
 
@@ -1038,7 +1056,7 @@
                                     Total Delay
                                 </span>
 
-                                <strong class="danger">
+                                <strong class="danger" id="scenario2Delay">
                                     31 min
                                 </strong>
 
@@ -1051,7 +1069,7 @@
 
                                     Conflicts
 
-                                    <b>
+                                    <b id="scenario2Conflicts">
                                         2
                                     </b>
 
@@ -1062,7 +1080,7 @@
 
                                     Stops
 
-                                    <b>
+                                    <b id="scenario2Stops">
                                         2
                                     </b>
 
@@ -1090,12 +1108,12 @@
 
                     <!-- SCENARIO 3 -->
 
-                    <article class="scenario-card">
+                    <article class="scenario-card" data-scenario="HOLD_BOTH">
 
 
                         <div class="scenario-header">
 
-                            <strong>
+                            <strong id="scenario3Title">
                                 Scenario 3: Hold Both
                             </strong>
 
@@ -1112,7 +1130,7 @@
                                     Total Delay
                                 </span>
 
-                                <strong class="warning">
+                                <strong class="warning" id="scenario3Delay">
                                     19 min
                                 </strong>
 
@@ -1125,7 +1143,7 @@
 
                                     Conflicts
 
-                                    <b>
+                                    <b id="scenario3Conflicts">
                                         1
                                     </b>
 
@@ -1136,7 +1154,7 @@
 
                                     Stops
 
-                                    <b>
+                                    <b id="scenario3Stops">
                                         2
                                     </b>
 

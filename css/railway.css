@@ -317,3 +317,52 @@
     background: #22c55e;
     flex-shrink: 0;
 }
+
+/* ============================================
+   WHAT-IF SCENARIO INTERACTION
+============================================ */
+
+.scenario-card {
+    cursor: pointer;
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.scenario-card:hover {
+    transform: translateY(-2px);
+}
+
+.scenario-card.selected {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 1px #22c55e;
+}
+
+.scenario-actions {
+    margin-top: 20px;
+    padding-top: 16px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.selected-scenario {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.selected-scenario span {
+    font-size: 11px;
+    opacity: 0.6;
+    text-transform: uppercase;
+}
+
+.selected-scenario strong {
+    font-size: 14px;
+}
