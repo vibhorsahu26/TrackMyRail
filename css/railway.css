@@ -1,0 +1,319 @@
+/* =========================================================
+   TRACKMYRAIL
+   PHASE 2 — RAILWAY INTERACTION
+========================================================= */
+
+
+/* =========================================================
+   TRAIN
+========================================================= */
+
+.rail-train {
+
+    position: absolute;
+
+    transition:
+        left 0.8s ease,
+        transform 0.2s ease;
+
+    cursor: pointer;
+
+    z-index: 20;
+
+}
+
+
+.rail-train:hover,
+.train-hover {
+
+    transform:
+        scale(1.08);
+
+}
+
+
+.selected-train {
+
+    transform:
+        scale(1.18);
+
+    z-index: 50;
+
+}
+
+
+.train-running {
+
+    filter:
+        drop-shadow(
+            0 0 7px
+            rgba(36, 208, 111, 0.35)
+        );
+
+}
+
+
+.train-hold {
+
+    filter:
+        drop-shadow(
+            0 0 7px
+            rgba(244, 181, 27, 0.45)
+        );
+
+}
+
+
+/* =========================================================
+   TRAIN LABEL
+========================================================= */
+
+.train-label {
+
+    pointer-events: none;
+
+}
+
+
+/* =========================================================
+   SIGNAL STATES
+========================================================= */
+
+.signal {
+
+    transition:
+        background 0.2s,
+        box-shadow 0.2s;
+
+}
+
+
+.signal.green {
+
+    background:
+        #24d06f;
+
+    box-shadow:
+        0 0 10px
+        rgba(36, 208, 111, 0.8);
+
+}
+
+
+.signal.red {
+
+    background:
+        #ff4545;
+
+    box-shadow:
+        0 0 10px
+        rgba(255, 69, 69, 0.8);
+
+}
+
+
+.signal.yellow {
+
+    background:
+        #f4b51b;
+
+    box-shadow:
+        0 0 10px
+        rgba(244, 181, 27, 0.8);
+
+}
+
+
+/* =========================================================
+   TRACK
+========================================================= */
+
+.track {
+
+    transition:
+        background 0.3s,
+        box-shadow 0.3s;
+
+}
+
+
+.track.occupied {
+
+    box-shadow:
+        0 0 8px
+        rgba(255, 69, 69, 0.25);
+
+}
+
+
+.track.free {
+
+    opacity:
+        0.8;
+
+}
+
+
+/* =========================================================
+   OBJECT PANEL
+========================================================= */
+
+.railway-object-panel {
+
+    position: absolute;
+
+    right: 16px;
+
+    bottom: 16px;
+
+    width: 260px;
+
+    padding: 14px;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.08);
+
+    border-radius: 6px;
+
+    background:
+        rgba(9, 16, 25, 0.96);
+
+    backdrop-filter:
+        blur(12px);
+
+    box-shadow:
+        0 12px 30px
+        rgba(0,0,0,0.35);
+
+    opacity: 0;
+
+    transform:
+        translateY(10px);
+
+    pointer-events: none;
+
+    transition:
+        opacity 0.2s,
+        transform 0.2s;
+
+    z-index: 100;
+
+}
+
+
+.railway-object-panel.visible {
+
+    opacity: 1;
+
+    transform:
+        translateY(0);
+
+    pointer-events: auto;
+
+}
+
+
+/* =========================================================
+   OBJECT HEADER
+========================================================= */
+
+.object-panel-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 10px;
+
+}
+
+
+.object-panel-header span {
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+    color:
+        #6ca8ff;
+
+}
+
+
+.object-panel-header button {
+
+    width: 24px;
+
+    height: 24px;
+
+    border: 0;
+
+    border-radius: 4px;
+
+    background:
+        rgba(255,255,255,0.05);
+
+    color:
+        #9ba7b4;
+
+    cursor: pointer;
+
+}
+
+
+.railway-object-panel h3 {
+
+    margin: 0 0 12px;
+
+    font-size: 14px;
+
+}
+
+
+.object-panel-content {
+
+    color:
+        #9da9b6;
+
+    font-size: 10px;
+
+}
+
+
+.railway-detail {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 6px 0;
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,0.05);
+
+}
+
+
+.railway-detail strong {
+
+    color:
+        #e0e6ed;
+
+}
+
+.signal-legend {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #22c55e;
+    flex-shrink: 0;
+}

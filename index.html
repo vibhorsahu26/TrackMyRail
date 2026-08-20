@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TrackMyRail — Control Center</title>
+
+    <meta name="description"
+        content="TrackMyRail AI-powered decision support for real-time train traffic optimization.">
+
+    <!-- =====================================================
+         MAIN STYLES
+    ====================================================== -->
+
+    <link rel="stylesheet" href="./css/style.css">
+
+    <link rel="stylesheet" href="./css/railway.css">
+
+
+    <!-- =====================================================
+         LUCIDE ICONS
+    ====================================================== -->
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+</head>
+
+
+<body>
+
+    <!-- =====================================================
+         APPLICATION
+    ====================================================== -->
+
+    <div class="app">
+
+
+        <!-- =================================================
+             TOP BAR
+        ================================================== -->
+
+        <header class="topbar">
+
+
+            <!-- BRAND -->
+
+            <div class="brand">
+
+                <div class="brand-icon">
+
+                    <i data-lucide="train-front"></i>
+
+                </div>
+
+
+                <div>
+
+                    <h1>
+                        TrackMyRail
+                    </h1>
+
+                    <p>
+                        AI-Powered Train Traffic Control
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- SYSTEM STATUS -->
+
+            <div class="system-status">
+
+                <span class="status-dot"></span>
+
+                <span>
+                    System Online
+                </span>
+
+            </div>
+
+
+
+            <!-- CLOCK -->
+
+            <div class="clock">
+
+                <strong id="currentTime">
+                    10:24:35
+                </strong>
+
+                <span id="currentDate">
+                    20 Aug 2026
+                </span>
+
+            </div>
+
+
+
+            <!-- CONTROLLER -->
+
+            <div class="controller">
+
+                <div class="controller-avatar">
+
+                    <i data-lucide="user-round"></i>
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        Controller
+                    </strong>
+
+                    <span>
+                        Section: NDLS–AGRA
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- TOP ACTIONS -->
+
+            <div class="top-actions">
+
+
+                <button class="icon-button" title="Settings">
+
+                    <i data-lucide="settings"></i>
+
+                </button>
+
+
+
+                <button class="icon-button notification-button" title="Notifications">
+
+                    <i data-lucide="bell"></i>
+
+                    <span class="notification-count">
+                        2
+                    </span>
+
+                </button>
+
+
+
+                <button class="icon-button" title="Logout">
+
+                    <i data-lucide="log-out"></i>
+
+                </button>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- =================================================
+             MAIN CONTENT
+        ================================================== -->
+
+        <main class="dashboard">
+
+
+            <!-- =============================================
+                 ACTIVE TRAINS
+            ============================================== -->
+
+            <section class="panel trains-panel">
+
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h2>
+                            ACTIVE TRAINS
+                            <span>(6)</span>
+                        </h2>
+
+                    </div>
+
+
+                    <button class="primary-button">
+
+                        <i data-lucide="plus"></i>
+
+                        Add Train
+
+                    </button>
+
+                </div>
+
+
+
+                <!--
+                    Train cards are rendered from
+                    railwayData.js / app.js
+                -->
+
+                <div id="trainList" class="train-list"></div>
+
+
+
+                <button class="view-all-button">
+
+                    View All Trains
+
+                    <i data-lucide="arrow-right"></i>
+
+                </button>
+
+            </section>
+
+
+
+            <!-- =============================================
+                 SECTION VIEW
+            ============================================== -->
+
+            <section class="panel section-panel">
+
+
+                <!-- SECTION HEADER -->
+
+                <div class="panel-header section-header">
+
+                    <div>
+
+                        <h2>
+                            SECTION VIEW — NDLS TO AGRA
+                        </h2>
+
+                    </div>
+
+
+                    <!-- LEGEND -->
+
+                    <div class="section-legend">
+
+
+                        <span>
+
+                            <i class="legend-dot train"></i>
+
+                            Train
+
+                        </span>
+
+
+
+                        <span>
+
+                            <i class="legend-dot hold"></i>
+
+                            Stopped/Hold
+
+                        </span>
+
+
+
+                        <span>
+
+                            <i class="legend-dot conflict"></i>
+
+                            Conflict
+
+                        </span>
+
+
+
+                        <span>
+                            <i class="legend-dot signal-legend"></i>
+                            Signal
+                        </span>
+
+
+
+                        <span>
+
+                            <i class="legend-line occupied"></i>
+
+                            Track Occupied
+
+                        </span>
+
+
+
+                        <span>
+
+                            <i class="legend-line free"></i>
+
+                            Free Track
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     RAILWAY SCHEMATIC
+                ================================================== -->
+
+                <div class="railway-container">
+
+
+                    <!-- =========================================
+                         STATION — NEW DELHI
+                    ========================================== -->
+
+                    <div class="station station-ndls" data-station="NDLS">
+
+                        <div class="station-code">
+                            NDLS
+                        </div>
+
+                        <span>
+                            New Delhi
+                        </span>
+
+                    </div>
+
+
+
+                    <!-- =========================================
+                         STATION — MATHURA
+                    ========================================== -->
+
+                    <div class="station station-mtr" data-station="MTJ">
+
+                        <div class="station-code">
+                            MTR
+                        </div>
+
+                        <span>
+                            Mathura Jn
+                        </span>
+
+                    </div>
+
+
+
+                    <!-- =========================================
+                         STATION — AGRA
+                    ========================================== -->
+
+                    <div class="station station-agc" data-station="AGC">
+
+                        <div class="station-code">
+                            AGC
+                        </div>
+
+                        <span>
+                            Agra Cantt.
+                        </span>
+
+                    </div>
+
+
+
+                    <!-- =========================================
+                         STATION LINES
+                    ========================================== -->
+
+                    <div class="station-line line-ndls" aria-hidden="true"></div>
+
+
+                    <div class="station-line line-mtr" aria-hidden="true"></div>
+
+
+                    <div class="station-line line-agc" aria-hidden="true"></div>
+
+
+
+                    <!-- =========================================
+                         TRACK 1
+                    ========================================== -->
+
+                    <div class="track track-1" data-track="T1">
+
+                        <div class="track-occupied"></div>
+
+                    </div>
+
+
+
+                    <!-- =========================================
+                         TRACK 2
+                    ========================================== -->
+
+                    <div class="track track-2" data-track="T2">
+
+                        <div class="track-free"></div>
+
+                    </div>
+
+
+
+                    <!-- =========================================
+                         TRACK 3
+                    ========================================== -->
+
+                    <div class="track track-3" data-track="T3">
+
+                        <div class="track-free"></div>
+
+                    </div>
+
+
+
+                    <!-- =========================================
+                         JUNCTIONS
+                    ========================================== -->
+
+                    <div class="junction junction-one" aria-hidden="true"></div>
+
+
+                    <div class="junction junction-two" aria-hidden="true"></div>
+
+
+
+                    <!-- =========================================
+                         PLATFORM LABELS
+                    ========================================== -->
+
+                    <div class="platform platform-1">
+                        P1
+                    </div>
+
+
+                    <div class="platform platform-2">
+                        P2
+                    </div>
+
+
+                    <div class="platform platform-3">
+                        P1
+                    </div>
+
+
+                    <div class="platform platform-4">
+                        P2
+                    </div>
+
+
+
+                    <!-- =========================================
+                         TRAIN — 12951
+                    ========================================== -->
+
+                    <div class="rail-train train-12951" data-train="12951" tabindex="0" role="button"
+                        aria-label="Train 12951">
+
+                        <div class="train-label">
+                            12951
+                        </div>
+
+                        <i data-lucide="train-front"></i>
+
+                        <div class="train-direction"></div>
+
+                    </div>
+
+
+
+                    <!-- =========================================
+                         TRAIN — 54821
+                    ========================================== -->
+
+                    <div class="rail-train conflict-train train-54821" data-train="54821" tabindex="0" role="button"
+                        aria-label="Train 54821">
+
+                        <div class="train-label">
+                            54821
+                        </div>
+
+                        <i data-lucide="train-front"></i>
+
+                        <div class="train-direction reverse"></div>
+
+                    </div>
+
+
+
+                    <!-- =========================================
+                         SIGNALS
+                    ========================================== -->
+
+                    <div class="signal signal-1 green" data-signal="S1" title="Signal S1" aria-label="Signal S1"></div>
+
+
+                    <div class="signal signal-2 red" data-signal="S2" title="Signal S2" aria-label="Signal S2"></div>
+
+
+                    <div class="signal signal-3 green" data-signal="S3" title="Signal S3" aria-label="Signal S3"></div>
+
+
+                    <div class="signal signal-4 yellow" data-signal="S4" title="Signal S4" aria-label="Signal S4"></div>
+
+
+
+                    <!-- =========================================
+                         CONFLICT MARKER
+                    ========================================== -->
+
+                    <div class="conflict-marker">
+
+                        <div class="conflict-pulse"></div>
+
+                        <div class="conflict-icon">
+                            !
+                        </div>
+
+                        <strong>
+                            CONFLICT
+                        </strong>
+
+                        <span>
+                            DETECTED
+                        </span>
+
+                    </div>
+
+
+
+                    <!-- =========================================
+                         RAILWAY OBJECT INFORMATION PANEL
+
+                         Phase 2:
+                         Clicking a train/station will populate
+                         this panel using railway.js.
+                    ========================================== -->
+
+                    <div id="railwayObjectPanel" class="railway-object-panel" aria-live="polite"></div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     SECTION INFORMATION
+                ================================================== -->
+
+                <div class="section-information">
+
+
+                    <!-- TOTAL TRAINS -->
+
+                    <div class="section-stat">
+
+                        <span>
+                            Total Trains
+                        </span>
+
+                        <strong>
+                            6
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- ON TIME -->
+
+                    <div class="section-stat">
+
+                        <span>
+                            On Time
+                        </span>
+
+                        <strong class="success">
+
+                            2
+
+                            <small>
+                                (33%)
+                            </small>
+
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- DELAYED -->
+
+                    <div class="section-stat">
+
+                        <span>
+                            Delayed
+                        </span>
+
+                        <strong class="danger">
+
+                            4
+
+                            <small>
+                                (67%)
+                            </small>
+
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- AVERAGE DELAY -->
+
+                    <div class="section-stat">
+
+                        <span>
+                            Avg Delay
+                        </span>
+
+                        <strong>
+                            7.2 min
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- THROUGHPUT -->
+
+                    <div class="section-stat">
+
+                        <span>
+                            Throughput
+                        </span>
+
+                        <strong>
+
+                            18
+
+                            <small>
+                                trains/hr
+                            </small>
+
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- TRACK USAGE -->
+
+                    <div class="section-stat">
+
+                        <span>
+                            Track Usage
+                        </span>
+
+                        <strong>
+                            82%
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =============================================
+                 AI DECISION ASSISTANT
+            ============================================== -->
+
+            <section class="panel ai-panel">
+
+
+                <div class="panel-header">
+
+                    <h2>
+                        AI DECISION ASSISTANT
+                    </h2>
+
+                </div>
+
+
+
+                <!-- CONFLICT -->
+
+                <div class="conflict-alert">
+
+                    <i data-lucide="triangle-alert"></i>
+
+                    <strong>
+                        CONFLICT DETECTED
+                    </strong>
+
+                </div>
+
+
+
+                <!-- TRAINS IN CONFLICT -->
+
+                <div class="conflict-trains">
+
+                    <h3>
+                        Trains In Conflict
+                    </h3>
+
+
+                    <div class="versus-container">
+
+
+                        <div class="conflict-train-card">
+
+                            <strong>
+                                12951
+                            </strong>
+
+                            <span>
+                                Rajdhani Express
+                            </span>
+
+                            <small class="priority high">
+                                HIGH
+                            </small>
+
+                        </div>
+
+
+
+                        <div class="versus">
+                            VS
+                        </div>
+
+
+
+                        <div class="conflict-train-card">
+
+                            <strong>
+                                54821
+                            </strong>
+
+                            <span>
+                                Freight
+                            </span>
+
+                            <small class="priority low">
+                                LOW
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- RECOMMENDATION -->
+
+                <div class="recommendation">
+
+                    <h3>
+                        RECOMMENDED ACTION
+                    </h3>
+
+
+                    <strong>
+                        Allow 12951 to proceed
+                    </strong>
+
+
+                    <div class="recommendation-detail">
+
+
+                        <span>
+
+                            <i data-lucide="arrow-right"></i>
+
+                            Hold 54821 at Mathura Jn
+
+                        </span>
+
+
+                        <span>
+
+                            <i data-lucide="clock-3"></i>
+
+                            Estimated hold: 6 minutes
+
+                        </span>
+
+                    </div>
+
+
+
+                    <div class="recommendation-actions">
+
+
+                        <button class="accept-button">
+                            Accept Decision
+                        </button>
+
+
+                        <button class="simulate-button">
+                            Simulate
+                        </button>
+
+
+                        <button class="override-button">
+                            Override
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- EXPLANATION -->
+
+                <div class="decision-reason">
+
+                    <h3>
+                        WHY THIS DECISION?
+                    </h3>
+
+
+                    <ul>
+
+
+                        <li>
+
+                            <i data-lucide="circle-check"></i>
+
+                            Higher priority of 12951
+
+                        </li>
+
+
+                        <li>
+
+                            <i data-lucide="circle-check"></i>
+
+                            12951 is delayed by 12 min
+
+                        </li>
+
+
+                        <li>
+
+                            <i data-lucide="circle-check"></i>
+
+                            Holding 54821 reduces total delay
+
+                        </li>
+
+
+                        <li>
+
+                            <i data-lucide="circle-check"></i>
+
+                            Crossing available at Mathura Jn
+
+                        </li>
+
+
+                    </ul>
+
+                </div>
+
+
+
+                <!-- IMPACT -->
+
+                <div class="impact">
+
+                    <h3>
+                        EXPECTED IMPACT
+                    </h3>
+
+
+                    <div class="impact-grid">
+
+
+                        <div>
+
+                            <span>
+                                Total Delay
+                            </span>
+
+
+                            <div class="impact-values">
+
+                                <strong class="before">
+                                    31 min
+                                </strong>
+
+                                <span>
+                                    →
+                                </span>
+
+                                <strong class="after">
+                                    14 min
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div>
+
+                            <span>
+                                Reduction
+                            </span>
+
+
+                            <strong class="reduction">
+                                17 min
+                            </strong>
+
+
+                            <small>
+                                (54%)
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =============================================
+                 WHAT IF ANALYSIS
+            ============================================== -->
+
+            <section class="panel what-if-panel">
+
+
+                <div class="panel-header">
+
+                    <h2>
+                        WHAT-IF ANALYSIS
+                    </h2>
+
+
+                    <button class="text-button">
+                        Compare Scenarios
+                    </button>
+
+                </div>
+
+
+
+                <div class="scenario-grid">
+
+
+                    <!-- SCENARIO 1 -->
+
+                    <article class="scenario-card recommended">
+
+
+                        <div class="scenario-header">
+
+                            <strong>
+                                Scenario 1: 12951 First
+                            </strong>
+
+                            <span>
+                                RECOMMENDED
+                            </span>
+
+                        </div>
+
+
+
+                        <div class="scenario-content">
+
+
+                            <div>
+
+                                <span>
+                                    Total Delay
+                                </span>
+
+                                <strong class="success">
+                                    14 min
+                                </strong>
+
+                            </div>
+
+
+                            <div class="scenario-stats">
+
+                                <span>
+
+                                    Conflicts
+
+                                    <b>
+                                        1
+                                    </b>
+
+                                </span>
+
+
+                                <span>
+
+                                    Stops
+
+                                    <b>
+                                        1
+                                    </b>
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="scenario-track">
+
+                            <div class="scenario-train green"></div>
+
+                            <div class="scenario-node"></div>
+
+                            <div class="scenario-train red"></div>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- SCENARIO 2 -->
+
+                    <article class="scenario-card">
+
+
+                        <div class="scenario-header">
+
+                            <strong>
+                                Scenario 2: 54821 First
+                            </strong>
+
+                        </div>
+
+
+
+                        <div class="scenario-content">
+
+
+                            <div>
+
+                                <span>
+                                    Total Delay
+                                </span>
+
+                                <strong class="danger">
+                                    31 min
+                                </strong>
+
+                            </div>
+
+
+                            <div class="scenario-stats">
+
+                                <span>
+
+                                    Conflicts
+
+                                    <b>
+                                        2
+                                    </b>
+
+                                </span>
+
+
+                                <span>
+
+                                    Stops
+
+                                    <b>
+                                        2
+                                    </b>
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="scenario-track">
+
+                            <div class="scenario-train red"></div>
+
+                            <div class="scenario-node"></div>
+
+                            <div class="scenario-train green"></div>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- SCENARIO 3 -->
+
+                    <article class="scenario-card">
+
+
+                        <div class="scenario-header">
+
+                            <strong>
+                                Scenario 3: Hold Both
+                            </strong>
+
+                        </div>
+
+
+
+                        <div class="scenario-content">
+
+
+                            <div>
+
+                                <span>
+                                    Total Delay
+                                </span>
+
+                                <strong class="warning">
+                                    19 min
+                                </strong>
+
+                            </div>
+
+
+                            <div class="scenario-stats">
+
+                                <span>
+
+                                    Conflicts
+
+                                    <b>
+                                        1
+                                    </b>
+
+                                </span>
+
+
+                                <span>
+
+                                    Stops
+
+                                    <b>
+                                        2
+                                    </b>
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="scenario-track">
+
+                            <div class="scenario-train white"></div>
+
+                            <div class="scenario-node"></div>
+
+                            <div class="scenario-train yellow"></div>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =============================================
+                 ALERTS
+            ============================================== -->
+
+            <section class="panel alerts-panel">
+
+
+                <div class="panel-header">
+
+                    <h2>
+                        RECENT ALERTS / EVENTS
+                    </h2>
+
+
+                    <button class="text-button">
+                        View All
+                    </button>
+
+                </div>
+
+
+
+                <div class="alerts-list">
+
+
+                    <!-- ALERT 1 -->
+
+                    <div class="alert-item">
+
+                        <span class="alert-time">
+                            10:21
+                        </span>
+
+
+                        <div class="alert-icon critical">
+
+                            <i data-lucide="triangle-alert"></i>
+
+                        </div>
+
+
+                        <div>
+
+                            <strong>
+                                Conflict detected between 12951 and 54821
+                            </strong>
+
+                            <span>
+                                Mathura Jn – Platform 2
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- ALERT 2 -->
+
+                    <div class="alert-item">
+
+                        <span class="alert-time">
+                            10:15
+                        </span>
+
+
+                        <div class="alert-icon warning">
+
+                            <i data-lucide="radio-tower"></i>
+
+                        </div>
+
+
+                        <div>
+
+                            <strong>
+                                Signal issue reported at Farah
+                            </strong>
+
+                            <span>
+                                Delay: 5–7 minutes
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- ALERT 3 -->
+
+                    <div class="alert-item">
+
+                        <span class="alert-time">
+                            10:10
+                        </span>
+
+
+                        <div class="alert-icon info">
+
+                            <i data-lucide="train-front"></i>
+
+                        </div>
+
+
+                        <div>
+
+                            <strong>
+                                Train 64315 departed from Mathura Jn
+                            </strong>
+
+                            <span>
+                                Running 2 min late
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+
+
+        <!-- =================================================
+             BOTTOM NAVIGATION
+        ================================================== -->
+
+        <nav class="bottom-nav">
+
+
+            <button class="nav-item active">
+
+                <i data-lucide="layout-dashboard"></i>
+
+                <span>
+                    Dashboard
+                </span>
+
+            </button>
+
+
+
+            <button class="nav-item">
+
+                <i data-lucide="train-front"></i>
+
+                <span>
+                    Trains
+                </span>
+
+            </button>
+
+
+
+            <button class="nav-item">
+
+                <i data-lucide="route"></i>
+
+                <span>
+                    Section View
+                </span>
+
+            </button>
+
+
+
+            <button class="nav-item">
+
+                <i data-lucide="calendar-days"></i>
+
+                <span>
+                    Schedule
+                </span>
+
+            </button>
+
+
+
+            <button class="nav-item">
+
+                <i data-lucide="triangle-alert"></i>
+
+                <span>
+                    Disruptions
+                </span>
+
+            </button>
+
+
+
+            <button class="nav-item">
+
+                <i data-lucide="file-text"></i>
+
+                <span>
+                    Reports
+                </span>
+
+            </button>
+
+
+
+            <button class="nav-item">
+
+                <i data-lucide="history"></i>
+
+                <span>
+                    History
+                </span>
+
+            </button>
+
+        </nav>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         APPLICATION JAVASCRIPT
+    ====================================================== -->
+
+    <!--
+        IMPORTANT:
+        railwayData.js must load FIRST because railway.js
+        depends on railwayState.
+    -->
+
+    <script src="./js/railwayData.js"></script>
+
+    <script src="./js/railway.js"></script>
+
+    <script src="./js/app.js"></script>
+
+
+</body>
+
+</html>
