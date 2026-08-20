@@ -19,6 +19,12 @@ function initializeRailway() {
 
     renderTrains();
 
+    updateTrackOccupancy();
+
+    updateTrackUsage();
+
+    updateTrackVisuals();
+
     // renderTracks();
 
     updateTrackStatus();
@@ -34,7 +40,7 @@ function initializeRailway() {
     initializeRailwayInteractions();
 
     initializeSimulationControls();
-    
+
     startTrainSimulation();
 
 }
@@ -590,6 +596,103 @@ function generateDecision() {
         ]
 
     };
+
+}
+// ============================================================
+// PHASE 6.4 — TRACK OCCUPANCY
+// ============================================================
+
+function updateTrackOccupancy() {
+
+    if (!railwayState || !railwayState.trains) {
+        return;
+    }
+
+    // Reset all tracks
+    if (railwayState.tracks) {
+
+        Object.values(railwayState.tracks).forEach(track => {
+            track.occupied = false;
+            track.occupiedBy = null;
+        });
+
+    }
+
+    // Check every train
+    Object.values(railwayState.trains).forEach(train => {
+
+        if (!train.track) {
+            return;
+        }
+
+        const track =
+            railwayState.tracks[train.track];
+
+        if (!track) {
+            return;
+        }
+
+        track.occupied = true;
+        track.occupiedBy = train.number;
+
+    });
+
+}
+function updateTrackVisuals() {
+
+    if (!railwayState || !railwayState.tracks) {
+        return;
+    }
+
+    Object.values(railwayState.tracks).forEach(track => {
+
+        const trackElement =
+            document.querySelector(
+                `[data-track="${track.id}"]`
+            );
+
+        if (!trackElement) {
+            return;
+        }
+
+        const occupiedElement =
+            trackElement.querySelector(
+                ".track-occupied"
+            );
+
+        const freeElement =
+            trackElement.querySelector(
+                ".track-free"
+            );
+
+
+        // Track occupied
+        if (track.occupied) {
+
+            if (occupiedElement) {
+                occupiedElement.style.display = "block";
+            }
+
+            if (freeElement) {
+                freeElement.style.display = "none";
+            }
+
+        }
+
+        // Track free
+        else {
+
+            if (occupiedElement) {
+                occupiedElement.style.display = "none";
+            }
+
+            if (freeElement) {
+                freeElement.style.display = "block";
+            }
+
+        }
+
+    });
 
 }
 function simulateScenario(scenario) {
@@ -1747,9 +1850,53 @@ function updateTrainVisualPositions() {
     });
 
 }
+function updateTrackUsage() {
+
+    if (
+        !railwayState ||
+        !railwayState.tracks
+    ) {
+        return;
+    }
+
+    const tracks =
+        Object.values(
+            railwayState.tracks
+        );
+
+    if (tracks.length === 0) {
+        return;
+    }
+
+    const occupiedTracks =
+        tracks.filter(
+            track => track.occupied
+        ).length;
+
+    const usage =
+        Math.round(
+            (occupiedTracks / tracks.length) * 100
+        );
+
+    const usageElement =
+        document.getElementById(
+            "trackUsageValue"
+        );
+
+    if (usageElement) {
+
+        usageElement.textContent =
+            `${usage}%`;
+
+    }
+
+}
 
 updateTrainPositions(deltaTime);
+updateTrackOccupancy();
+updateTrackUsage();
 updateTrainVisualPositions();
+updateTrackVisuals();
 
 // ============================================================
 // SIMULATION CONTROLS

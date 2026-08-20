@@ -567,3 +567,25 @@
     }
 
 }
+/* ============================================================
+   PHASE 6.4 — DYNAMIC TRACK OCCUPANCY
+============================================================ */
+
+.track {
+    transition:
+        opacity 0.2s ease,
+        filter 0.2s ease;
+}
+
+.track.occupied {
+    opacity: 1;
+
+    filter:
+        drop-shadow(
+            0 0 5px rgba(239, 68, 68, 0.45)
+        );
+}
+
+.track:not(.occupied) {
+    opacity: 0.65;
+}
