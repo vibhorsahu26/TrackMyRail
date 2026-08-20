@@ -589,3 +589,117 @@
 .track:not(.occupied) {
     opacity: 0.65;
 }
+/* ============================================================
+   PHASE 6.5 — DYNAMIC SIGNALS
+============================================================ */
+
+.signal {
+    transition:
+        background 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+/* GREEN */
+
+.signal.green {
+
+    background: #22c55e;
+
+    box-shadow:
+        0 0 8px rgba(34, 197, 94, 0.75);
+
+}
+
+
+/* YELLOW */
+
+.signal.yellow {
+
+    background: #f59e0b;
+
+    box-shadow:
+        0 0 8px rgba(245, 158, 11, 0.75);
+
+}
+
+
+/* RED */
+
+.signal.red {
+
+    background: #ef4444;
+
+    box-shadow:
+        0 0 8px rgba(239, 68, 68, 0.75);
+
+}
+/* ============================================================
+   SIGNAL STATE ANIMATION
+============================================================ */
+
+.signal.red {
+    animation: signalRedPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes signalRedPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.55;
+    }
+
+}
+/* ============================================================
+   PHASE 6.6 — DYNAMIC CONFLICT UI
+============================================================ */
+
+.conflict-alert {
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+}
+
+.conflict-alert:not(.active) {
+    opacity: 0.65;
+}
+
+
+.conflict-alert.active {
+    animation:
+        conflictAlertPulse 1.5s ease-in-out infinite;
+}
+
+
+.conflict-alert[data-severity="HIGH"] {
+    border-color: rgba(239, 68, 68, 0.8);
+}
+
+
+.conflict-alert[data-severity="MEDIUM"] {
+    border-color: rgba(245, 158, 11, 0.8);
+}
+
+
+.conflict-alert[data-severity="LOW"] {
+    border-color: rgba(34, 197, 94, 0.6);
+}
+
+
+@keyframes conflictAlertPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.78;
+    }
+
+}

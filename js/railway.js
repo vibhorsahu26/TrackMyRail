@@ -1,8 +1,4 @@
-/* =========================================================
-   TRACKMYRAIL
-   PHASE 2 — RAILWAY CONTROLLER
-========================================================= */
-
+let activeDecision = null;
 
 let selectedTrain = null;
 
@@ -18,6 +14,8 @@ function initializeRailway() {
     renderSignals();
 
     renderTrains();
+
+    // renderTracks();
 
     updateTrackOccupancy();
 
@@ -43,6 +41,13 @@ function initializeRailway() {
 
     startTrainSimulation();
 
+    railwayState.conflicts = [];
+
+    updateDynamicConflicts();
+
+    updateDynamicConflictUI();
+
+    initializeDecisionControls();
 }
 
 
@@ -636,6 +641,331 @@ function updateTrackOccupancy() {
         track.occupiedBy = train.number;
 
     });
+
+}
+// ============================================================
+// PHASE 6.5 — DYNAMIC SIGNAL LOGIC
+// ============================================================
+
+// ============================================================
+// PHASE 6.5b — TOPOLOGY-AWARE SIGNAL LOGIC
+// ============================================================
+
+function updateSignalStates() {
+
+    if (!railwayState || !railwayState.tracks) {
+        return;
+    }
+
+
+    /*
+     * Signal topology
+     *
+     * signal-1 protects T1
+     * signal-2 protects T2
+     * signal-3 protects T3
+     * signal-4 is an approach signal for T3
+     *
+     * nextTrack tells the signal what block comes after
+     * the protected block.
+     */
+
+    const signalTopology = {
+
+        "signal-1": {
+            track: "T1",
+            nextTrack: "T2"
+        },
+
+        "signal-2": {
+            track: "T2",
+            nextTrack: "T3"
+        },
+
+        "signal-3": {
+            track: "T3",
+            nextTrack: null
+        },
+
+        "signal-4": {
+            track: "T3",
+            nextTrack: null
+        }
+
+    };
+
+
+    Object.entries(signalTopology).forEach(
+        ([signalId, topology]) => {
+
+            const currentTrack =
+                railwayState.tracks[
+                topology.track
+                ];
+
+
+            if (!currentTrack) {
+                return;
+            }
+
+
+            const nextTrack =
+                topology.nextTrack
+                    ? railwayState.tracks[
+                    topology.nextTrack
+                    ]
+                    : null;
+
+
+            let signalState = "green";
+
+
+            // ------------------------------------------------
+            // CURRENT BLOCK OCCUPIED
+            // ------------------------------------------------
+
+            if (currentTrack.occupied) {
+
+                signalState = "red";
+
+            }
+
+
+            // ------------------------------------------------
+            // CURRENT BLOCK FREE
+            // BUT NEXT BLOCK OCCUPIED
+            // ------------------------------------------------
+
+            else if (
+                nextTrack &&
+                nextTrack.occupied
+            ) {
+
+                signalState = "yellow";
+
+            }
+
+
+            // ------------------------------------------------
+            // BOTH BLOCKS CLEAR
+            // ------------------------------------------------
+
+            else {
+
+                signalState = "green";
+
+            }
+
+
+            updateSignalElement(
+                signalId,
+                signalState
+            );
+
+        }
+    );
+
+}
+function updateSignalElement(
+    signalId,
+    state
+) {
+
+    const signal =
+        document.querySelector(
+            `.${signalId}`
+        );
+
+    if (!signal) {
+        return;
+    }
+
+
+    // Remove previous state
+    signal.classList.remove(
+        "green",
+        "yellow",
+        "red"
+    );
+
+
+    // Apply new state
+    signal.classList.add(
+        state
+    );
+
+
+    // Accessibility / debugging
+    signal.dataset.state =
+        state;
+
+}
+// ============================================================
+// PHASE 6.6 — DYNAMIC CONFLICT DETECTION
+// ============================================================
+
+function detectDynamicConflicts() {
+
+    if (!railwayState || !railwayState.trains) {
+        return [];
+    }
+
+    const trains = Object.values(
+        railwayState.trains
+    );
+
+    const conflicts = [];
+
+
+    // --------------------------------------------------------
+    // Compare every train against every other train
+    // --------------------------------------------------------
+
+    for (let i = 0; i < trains.length; i++) {
+
+        for (let j = i + 1; j < trains.length; j++) {
+
+            const trainA = trains[i];
+            const trainB = trains[j];
+
+
+            // Ignore stopped trains
+            if (
+                trainA.status === "STOPPED" ||
+                trainB.status === "STOPPED"
+            ) {
+                continue;
+            }
+
+
+            // Ignore trains without position data
+            if (
+                typeof trainA.position !== "number" ||
+                typeof trainB.position !== "number"
+            ) {
+                continue;
+            }
+
+
+            // ------------------------------------------------
+            // Determine whether trains are approaching each
+            // other.
+            // ------------------------------------------------
+
+            const oppositeDirection =
+                trainA.direction &&
+                trainB.direction &&
+                trainA.direction !== trainB.direction;
+
+
+            if (!oppositeDirection) {
+                continue;
+            }
+
+
+            // ------------------------------------------------
+            // Distance between trains
+            // ------------------------------------------------
+
+            const distance =
+                Math.abs(
+                    trainA.position -
+                    trainB.position
+                );
+
+
+            // Ignore trains that are far apart
+            if (distance > 15) {
+                continue;
+            }
+
+
+            // ------------------------------------------------
+            // Estimate time to conflict
+            // ------------------------------------------------
+
+            const speedA =
+                Number(trainA.speed) || 0;
+
+            const speedB =
+                Number(trainB.speed) || 0;
+
+
+            const combinedSpeed =
+                speedA + speedB;
+
+
+            let timeToConflict = Infinity;
+
+
+            if (combinedSpeed > 0) {
+
+                timeToConflict =
+                    distance /
+                    combinedSpeed *
+                    60;
+
+            }
+
+
+            // ------------------------------------------------
+            // Determine severity
+            // ------------------------------------------------
+
+            let severity = "LOW";
+
+
+            if (timeToConflict <= 3) {
+
+                severity = "HIGH";
+
+            }
+            else if (timeToConflict <= 7) {
+
+                severity = "MEDIUM";
+
+            }
+
+
+            conflicts.push({
+
+                trainA: trainA.number || trainA.id,
+
+                trainB: trainB.number || trainB.id,
+
+                distance:
+                    Number(distance.toFixed(2)),
+
+                timeToConflict:
+                    Number(
+                        timeToConflict.toFixed(2)
+                    ),
+
+                severity,
+
+                detectedAt:
+                    new Date().toISOString()
+
+            });
+
+        }
+    }
+
+
+    return conflicts;
+
+}
+function updateDynamicConflicts() {
+
+    const conflicts =
+        detectDynamicConflicts();
+
+
+    railwayState.conflicts =
+        conflicts;
+
+
+    return conflicts;
 
 }
 function updateTrackVisuals() {
@@ -1622,31 +1952,34 @@ function simulationLoop(currentTime) {
         return;
     }
 
-
     const realDeltaTime =
         (currentTime - lastSimulationTime) / 1000;
 
     const deltaTime =
-        realDeltaTime *
-        simulationSpeedMultiplier;
-
+        realDeltaTime * simulationSpeedMultiplier;
 
     lastSimulationTime = currentTime;
 
-
-    // Update simulation state
     updateTrainPositions(deltaTime);
 
+    updateTrackOccupancy();
 
-    // Update visual position
+    updateTrackUsage();
+
+    updateSignalStates();
+
+    updateDynamicConflicts();
+
+    updateDynamicConflictUI();
+
+    generateConflictDecision();
+
     updateTrainVisualPositions();
 
+    updateTrackVisuals();
 
     simulationFrame =
-        requestAnimationFrame(
-            simulationLoop
-        );
-
+        requestAnimationFrame(simulationLoop);
 }
 
 
@@ -1892,12 +2225,6 @@ function updateTrackUsage() {
 
 }
 
-updateTrainPositions(deltaTime);
-updateTrackOccupancy();
-updateTrackUsage();
-updateTrainVisualPositions();
-updateTrackVisuals();
-
 // ============================================================
 // SIMULATION CONTROLS
 // ============================================================
@@ -2105,6 +2432,310 @@ function resetTrainSimulation() {
 
     console.log(
         "Train simulation reset."
+    );
+
+}
+function updateDynamicConflictUI() {
+
+    const conflicts =
+        railwayState.conflicts || [];
+
+
+    const conflictAlert =
+        document.querySelector(
+            ".conflict-alert"
+        );
+
+
+    const conflictMarker =
+        document.querySelector(
+            ".conflict-marker"
+        );
+
+
+    // --------------------------------------------------------
+    // No conflict
+    // --------------------------------------------------------
+
+    if (conflicts.length === 0) {
+
+        if (conflictAlert) {
+
+            conflictAlert.classList.remove(
+                "active"
+            );
+
+        }
+
+
+        if (conflictMarker) {
+
+            conflictMarker.style.display =
+                "none";
+
+        }
+
+
+        return;
+
+    }
+
+
+    // --------------------------------------------------------
+    // Conflict exists
+    // --------------------------------------------------------
+
+    const highestSeverity =
+        getHighestConflictSeverity(
+            conflicts
+        );
+
+
+    if (conflictAlert) {
+
+        conflictAlert.classList.add(
+            "active"
+        );
+
+        conflictAlert.dataset.severity =
+            highestSeverity;
+
+    }
+
+
+    if (conflictMarker) {
+
+        conflictMarker.style.display =
+            "flex";
+
+        conflictMarker.dataset.severity =
+            highestSeverity;
+
+    }
+
+}
+function getHighestConflictSeverity(
+    conflicts
+) {
+
+    const priority = {
+
+        HIGH: 3,
+        MEDIUM: 2,
+        LOW: 1
+
+    };
+
+
+    let highest =
+        "LOW";
+
+
+    conflicts.forEach(conflict => {
+
+        if (
+            priority[conflict.severity] >
+            priority[highest]
+        ) {
+
+            highest =
+                conflict.severity;
+
+        }
+
+    });
+
+
+    return highest;
+
+}
+function generateConflictDecision() {
+
+    const conflicts =
+        railwayState.conflicts || [];
+
+    // No conflict
+    if (conflicts.length === 0) {
+
+        activeDecision = null;
+
+        return null;
+    }
+
+    // Pick the most serious conflict
+    const conflict =
+        [...conflicts].sort((a, b) => {
+
+            const priority = {
+                HIGH: 3,
+                MEDIUM: 2,
+                LOW: 1
+            };
+
+            return (
+                priority[b.severity] -
+                priority[a.severity]
+            );
+
+        })[0];
+
+
+    const trainA =
+        railwayState.trains[conflict.trainA];
+
+    const trainB =
+        railwayState.trains[conflict.trainB];
+
+
+    if (!trainA || !trainB) {
+        return null;
+    }
+
+
+    // --------------------------------------------------------
+    // Determine priority
+    // --------------------------------------------------------
+
+    const priorityValue = {
+        HIGH: 3,
+        MEDIUM: 2,
+        LOW: 1
+    };
+
+
+    const trainAPriority =
+        priorityValue[trainA.priority] || 1;
+
+    const trainBPriority =
+        priorityValue[trainB.priority] || 1;
+
+
+    let proceedTrain;
+    let holdTrain;
+
+
+    if (trainAPriority >= trainBPriority) {
+
+        proceedTrain = trainA;
+        holdTrain = trainB;
+
+    } else {
+
+        proceedTrain = trainB;
+        holdTrain = trainA;
+
+    }
+
+
+    activeDecision = {
+
+        type: "HOLD_TRAIN",
+
+        conflict,
+
+        proceedTrain:
+            proceedTrain.number ||
+            proceedTrain.id,
+
+        holdTrain:
+            holdTrain.number ||
+            holdTrain.id,
+
+        holdStation:
+            holdTrain.nextStation ||
+            "Mathura Jn",
+
+        estimatedHold:
+            Math.max(
+                3,
+                Math.ceil(
+                    conflict.timeToConflict
+                )
+            ),
+
+        status: "PENDING"
+
+    };
+
+
+    return activeDecision;
+}
+function acceptConflictDecision() {
+
+    if (!activeDecision) {
+
+        console.warn(
+            "No active conflict decision."
+        );
+
+        return;
+
+    }
+
+
+    const holdTrain =
+        railwayState.trains[
+            activeDecision.holdTrain
+        ];
+
+
+    if (!holdTrain) {
+
+        console.error(
+            "Hold train not found:",
+            activeDecision.holdTrain
+        );
+
+        return;
+
+    }
+
+
+    // Hold the train
+    holdTrain.status = "STOPPED";
+
+
+    // Store controller action
+    activeDecision.status = "ACCEPTED";
+
+
+    console.log(
+        `Decision accepted: Train ${activeDecision.holdTrain} held.`
+    );
+
+
+    // Recalculate railway state
+    updateTrackOccupancy();
+
+    updateTrackUsage();
+
+    updateSignalStates();
+
+    updateDynamicConflicts();
+
+    updateDynamicConflictUI();
+
+
+    // Generate next decision if necessary
+    generateConflictDecision();
+
+}
+function initializeDecisionControls() {
+
+    const acceptButton =
+        document.querySelector(
+            ".accept-button"
+        );
+
+
+    if (!acceptButton) {
+        return;
+    }
+
+
+    acceptButton.addEventListener(
+        "click",
+        acceptConflictDecision
     );
 
 }
