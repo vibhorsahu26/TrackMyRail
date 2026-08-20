@@ -1,174 +1,115 @@
-/* =========================================================
-   TRACKMYRAIL
-   PHASE 2 — RAILWAY DATA MODEL
-========================================================= */
-
 const railwayState = {
 
-    section: {
-        id: "NDLS-AGC",
-        name: "New Delhi - Agra",
-        distance: 195
+    trains: {
+        "12951": {
+            number: "12951",
+            name: "Rajdhani Express",
+            type: "Express",
+            priority: "HIGH",
+
+            currentStation: "NDLS",
+            nextStation: "MTJ",
+
+            speed: 82,
+            delay: 12,
+
+            track: "T1",
+            direction: "forward",
+
+            status: "running"
+        },
+
+        "54821": {
+            number: "54821",
+            name: "Freight",
+            type: "Freight",
+            priority: "LOW",
+
+            currentStation: "MTJ",
+            nextStation: "AGC",
+
+            speed: 45,
+            delay: 3,
+
+            track: "T1",
+            direction: "reverse",
+
+            status: "running"
+        }
     },
 
 
-    stations: [
+    stations: {
 
-        {
-            id: "NDLS",
+        "NDLS": {
             code: "NDLS",
             name: "New Delhi",
-            position: 8,
             platforms: 16
         },
 
-        {
-            id: "MTJ",
+        "MTJ": {
             code: "MTJ",
-            name: "Mathura Junction",
-            position: 52,
-            platforms: 10
+            name: "Mathura Jn",
+            platforms: 5
         },
 
-        {
-            id: "AGC",
+        "AGC": {
             code: "AGC",
-            name: "Agra Cantt",
-            position: 92,
+            name: "Agra Cantt.",
             platforms: 6
         }
 
-    ],
+    },
 
 
-    tracks: [
+    tracks: {
 
-        {
+        "T1": {
             id: "T1",
-            name: "UP MAIN",
-            occupied: true,
-            direction: "DOWN"
+            status: "occupied",
+            occupiedBy: ["12951", "54821"]
         },
 
-        {
+        "T2": {
             id: "T2",
-            name: "DOWN MAIN",
-            occupied: false,
-            direction: "DOWN"
+            status: "free",
+            occupiedBy: []
         },
 
-        {
+        "T3": {
             id: "T3",
-            name: "LOOP",
-            occupied: false,
-            direction: "BOTH"
+            status: "free",
+            occupiedBy: []
         }
 
-    ],
+    },
 
 
-    signals: [
+    signals: {
 
-        {
+        "S1": {
             id: "S1",
-            position: 20,
-            state: "GREEN"
+            state: "green"
         },
 
-        {
+        "S2": {
             id: "S2",
-            position: 48,
-            state: "RED"
+            state: "red"
         },
 
-        {
+        "S3": {
             id: "S3",
-            position: 68,
-            state: "GREEN"
+            state: "green"
         },
 
-        {
+        "S4": {
             id: "S4",
-            position: 88,
-            state: "YELLOW"
+            state: "yellow"
         }
 
-    ],
+    },
 
 
-    trains: [
-
-        {
-            id: "12951",
-
-            name: "Rajdhani Express",
-
-            type: "Express",
-
-            priority: "HIGH",
-
-            position: 32,
-
-            speed: 82,
-
-            delay: 12,
-
-            status: "RUNNING",
-
-            direction: "DOWN",
-
-            nextStation: "Mathura Junction"
-
-        },
-
-
-        {
-            id: "54821",
-
-            name: "Freight",
-
-            type: "Freight",
-
-            priority: "LOW",
-
-            position: 57,
-
-            speed: 0,
-
-            delay: 3,
-
-            status: "HOLD",
-
-            direction: "DOWN",
-
-            nextStation: "Agra Cantt"
-
-        },
-
-
-        {
-            id: "12007",
-
-            name: "Shatabdi Express",
-
-            type: "Express",
-
-            priority: "HIGH",
-
-            position: 43,
-
-            speed: 78,
-
-            delay: 8,
-
-            status: "RUNNING",
-
-            direction: "DOWN",
-
-            nextStation: "Mathura Junction"
-
-        }
-
-    ]
+    conflicts: []
 
 };
