@@ -33,6 +33,8 @@ function initializeRailway() {
 
     initializeRailwayInteractions();
 
+    startTrainSimulation();
+
 }
 
 
@@ -1450,3 +1452,293 @@ function applySelectedScenario() {
     );
 
 }
+
+// ============================================================
+// PHASE 6.1 — REAL-TIME TRAIN SIMULATION
+// ============================================================
+
+let simulationRunning = false;
+let simulationFrame = null;
+let lastSimulationTime = null;
+
+
+// ------------------------------------------------------------
+// Start simulation
+// ------------------------------------------------------------
+
+function startTrainSimulation() {
+
+    if (simulationRunning) {
+        return;
+    }
+
+    simulationRunning = true;
+    lastSimulationTime = performance.now();
+
+    console.log("Train simulation started.");
+
+    simulationFrame =
+        requestAnimationFrame(simulationLoop);
+}
+
+
+// ------------------------------------------------------------
+// Stop simulation
+// ------------------------------------------------------------
+
+function stopTrainSimulation() {
+
+    simulationRunning = false;
+
+    if (simulationFrame) {
+
+        cancelAnimationFrame(
+            simulationFrame
+        );
+
+        simulationFrame = null;
+    }
+
+    lastSimulationTime = null;
+
+    console.log("Train simulation stopped.");
+}
+
+
+// ------------------------------------------------------------
+// Main simulation loop
+// ------------------------------------------------------------
+
+function simulationLoop(currentTime) {
+
+    if (!simulationRunning) {
+        return;
+    }
+
+
+    const deltaTime =
+        (currentTime - lastSimulationTime) / 1000;
+
+
+    lastSimulationTime = currentTime;
+
+
+    // Update simulation state
+    updateTrainPositions(deltaTime);
+
+
+    // Update visual position
+    updateTrainVisualPositions();
+
+
+    simulationFrame =
+        requestAnimationFrame(
+            simulationLoop
+        );
+
+}
+
+
+// ------------------------------------------------------------
+// Update train positions
+// ------------------------------------------------------------
+
+function updateTrainPositions(deltaTime) {
+
+    if (
+        !railwayState ||
+        !railwayState.trains
+    ) {
+        return;
+    }
+
+
+    Object.values(
+        railwayState.trains
+    ).forEach(train => {
+
+        // ----------------------------------------
+        // Train is stopped / held
+        // ----------------------------------------
+
+        if (
+            train.status === "hold" ||
+            train.status === "stopped"
+        ) {
+            return;
+        }
+
+
+        // ----------------------------------------
+        // Speed
+        // ----------------------------------------
+
+        const speed =
+            Number(
+                train.simulationSpeed ??
+                train.speed ??
+                0
+            );
+
+
+        if (speed <= 0) {
+            return;
+        }
+
+
+        // ----------------------------------------
+        // Convert km/h to normalized
+        // section movement.
+        //
+        // This is simulation speed, NOT
+        // real railway distance.
+        // ----------------------------------------
+
+        const movement =
+            (speed / 3600) *
+            deltaTime *
+            0.8;
+
+
+        // ----------------------------------------
+        // Forward train
+        // ----------------------------------------
+
+        if (
+            train.direction === "forward"
+        ) {
+
+            train.position += movement;
+
+        }
+
+
+        // ----------------------------------------
+        // Reverse train
+        // ----------------------------------------
+
+        else if (
+            train.direction === "reverse"
+        ) {
+
+            train.position -= movement;
+
+        }
+
+
+        // ----------------------------------------
+        // Keep position inside section
+        // ----------------------------------------
+
+        train.position =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    train.position
+                )
+            );
+
+    });
+    
+
+}
+
+function updateTrainVisualPositions() {
+
+    if (!railwayState || !railwayState.trains) {
+        return;
+    }
+
+    Object.values(railwayState.trains).forEach(train => {
+
+        const trainElement = document.querySelector(
+            `.rail-train[data-train="${train.number}"]`
+        );
+
+        if (!trainElement) {
+            return;
+        }
+
+        const position = Math.max(
+            0,
+            Math.min(
+                100,
+                Number(train.position) || 0
+            )
+        );
+
+        trainElement.style.left = `${position}%`;
+
+        trainElement.classList.toggle(
+            "train-held",
+            train.status === "hold" ||
+            train.status === "stopped"
+        );
+
+    });
+}
+
+// ============================================================
+// PHASE 6.2 — VISUAL TRAIN MOVEMENT
+// ============================================================
+
+function updateTrainVisualPositions() {
+
+    if (
+        !railwayState ||
+        !railwayState.trains
+    ) {
+        return;
+    }
+
+
+    Object.values(
+        railwayState.trains
+    ).forEach(train => {
+
+        const trainElement =
+            document.querySelector(
+                `.rail-train[data-train="${train.number}"]`
+            );
+
+
+        if (!trainElement) {
+            return;
+        }
+
+
+        // ----------------------------------------
+        // Convert simulation position to CSS %
+        // ----------------------------------------
+
+        const position =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    Number(train.position) || 0
+                )
+            );
+
+
+        trainElement.style.left =
+            `${position}%`;
+
+
+        // ----------------------------------------
+        // Visual state
+        // ----------------------------------------
+
+        trainElement.classList.toggle(
+            "train-held",
+            train.status === "hold" ||
+            train.status === "stopped"
+        );
+
+    });
+
+}
+
+updateTrainPositions(deltaTime);
+updateTrainVisualPositions();

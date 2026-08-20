@@ -16,7 +16,11 @@ const railwayState = {
             track: "T1",
             direction: "forward",
 
-            status: "running"
+            status: "running",
+
+            position: 25,
+            simulationSpeed: 82,
+            direction: "forward",
         },
 
         "54821": {
@@ -34,7 +38,11 @@ const railwayState = {
             track: "T1",
             direction: "reverse",
 
-            status: "running"
+            status: "running",
+
+            position: 65,
+            simulationSpeed: 45,
+            direction: "reverse",
         }
     },
 

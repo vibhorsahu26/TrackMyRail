@@ -366,3 +366,19 @@
 .selected-scenario strong {
     font-size: 14px;
 }
+/* ============================================================
+   PHASE 6.2 — TRAIN SIMULATION STATES
+============================================================ */
+
+.rail-train {
+    transition: none;
+    will-change: left;
+}
+
+.rail-train.train-held {
+    opacity: 0.65;
+    filter: saturate(0.7);
+}
+.railway-container {
+    position: relative;
+}
