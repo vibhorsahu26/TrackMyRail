@@ -33,6 +33,8 @@ function initializeRailway() {
 
     initializeRailwayInteractions();
 
+    initializeSimulationControls();
+    
     startTrainSimulation();
 
 }
@@ -84,7 +86,7 @@ function renderStations() {
 
 function renderSignals() {
 
-     Object.values(railwayState.signals).forEach(signal => {
+    Object.values(railwayState.signals).forEach(signal => {
 
         const element =
             document.querySelector(
@@ -360,7 +362,7 @@ function showRailwayObject(object) {
 
 function updateTrackStatus() {
 
-     Object.values(railwayState.tracks).forEach(track => {
+    Object.values(railwayState.tracks).forEach(track => {
 
         const element =
             document.querySelector(
@@ -1461,6 +1463,8 @@ let simulationRunning = false;
 let simulationFrame = null;
 let lastSimulationTime = null;
 
+let simulationSpeedMultiplier = 1;
+
 
 // ------------------------------------------------------------
 // Start simulation
@@ -1516,8 +1520,12 @@ function simulationLoop(currentTime) {
     }
 
 
-    const deltaTime =
+    const realDeltaTime =
         (currentTime - lastSimulationTime) / 1000;
+
+    const deltaTime =
+        realDeltaTime *
+        simulationSpeedMultiplier;
 
 
     lastSimulationTime = currentTime;
@@ -1640,7 +1648,7 @@ function updateTrainPositions(deltaTime) {
             );
 
     });
-    
+
 
 }
 
@@ -1742,3 +1750,214 @@ function updateTrainVisualPositions() {
 
 updateTrainPositions(deltaTime);
 updateTrainVisualPositions();
+
+// ============================================================
+// SIMULATION CONTROLS
+// ============================================================
+
+function updateSimulationStatus() {
+
+    const statusText =
+        document.getElementById(
+            "simulationStatusText"
+        );
+
+    const statusContainer =
+        document.querySelector(
+            ".simulation-status"
+        );
+
+
+    if (!statusText || !statusContainer) {
+        return;
+    }
+
+
+    if (simulationRunning) {
+
+        statusText.textContent =
+            "Running";
+
+        statusContainer.classList.remove(
+            "paused"
+        );
+
+    } else {
+
+        statusText.textContent =
+            "Paused";
+
+        statusContainer.classList.add(
+            "paused"
+        );
+
+    }
+
+}
+function initializeSimulationControls() {
+
+    const startButton =
+        document.getElementById(
+            "simulationStartButton"
+        );
+
+    const pauseButton =
+        document.getElementById(
+            "simulationPauseButton"
+        );
+
+    const resetButton =
+        document.getElementById(
+            "simulationResetButton"
+        );
+
+
+    // --------------------------------------------
+    // START
+    // --------------------------------------------
+
+    if (startButton) {
+
+        startButton.addEventListener(
+            "click",
+            () => {
+
+                startTrainSimulation();
+
+                updateSimulationStatus();
+
+            }
+        );
+
+    }
+
+
+    // --------------------------------------------
+    // PAUSE
+    // --------------------------------------------
+
+    if (pauseButton) {
+
+        pauseButton.addEventListener(
+            "click",
+            () => {
+
+                stopTrainSimulation();
+
+                updateSimulationStatus();
+
+            }
+        );
+
+    }
+
+
+    // --------------------------------------------
+    // RESET
+    // --------------------------------------------
+
+    if (resetButton) {
+
+        resetButton.addEventListener(
+            "click",
+            resetTrainSimulation
+        );
+
+    }
+
+
+    // --------------------------------------------
+    // SPEED
+    // --------------------------------------------
+
+    const speedButtons =
+        document.querySelectorAll(
+            ".speed-button"
+        );
+
+
+    speedButtons.forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                const speed =
+                    Number(
+                        button.dataset.speed
+                    );
+
+
+                if (!speed) {
+                    return;
+                }
+
+
+                simulationSpeedMultiplier =
+                    speed;
+
+
+                speedButtons.forEach(
+                    item => {
+
+                        item.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
+
+
+                button.classList.add(
+                    "active"
+                );
+
+
+                console.log(
+                    `Simulation speed: ${speed}x`
+                );
+
+            }
+        );
+
+    });
+
+
+    updateSimulationStatus();
+
+}
+function resetTrainSimulation() {
+
+    const train12951 =
+        railwayState.trains["12951"];
+
+    const train54821 =
+        railwayState.trains["54821"];
+
+
+    if (train12951) {
+
+        train12951.position = 25;
+
+        train12951.status = "running";
+
+    }
+
+
+    if (train54821) {
+
+        train54821.position = 65;
+
+        train54821.status = "running";
+
+    }
+
+
+    updateTrainVisualPositions();
+
+
+    console.log(
+        "Train simulation reset."
+    );
+
+}
