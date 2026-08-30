@@ -703,3 +703,395 @@
     }
 
 }
+
+@media (max-width: 700px) {
+    .dashboard-toolbar {
+        align-items: stretch;
+        flex-wrap: wrap;
+    }
+
+    .toolbar-search {
+        min-width: 100%;
+    }
+
+    .freshness-status {
+        margin-left: auto;
+    }
+}
+/* =========================================================
+   DETAILED TOPOLOGY + SIMPLE AI VISUALS
+========================================================= */
+.topology-map { overflow: hidden; }
+.topology-svg { position:absolute; inset:0; width:100%; height:100%; z-index:1; pointer-events:none; }
+.topology-rail { fill:none; stroke:#95a3b3; stroke-width:1.8; vector-effect:non-scaling-stroke; }
+.topology-rail-inner { fill:none; stroke:#43515f; stroke-width:5; opacity:.75; vector-effect:non-scaling-stroke; }
+.topology-rail.occupied { stroke:#24d06f; filter:drop-shadow(0 0 4px rgba(36,208,111,.35)); }
+.topology-rail.block-hot { stroke:#ffb52e; filter:drop-shadow(0 0 5px rgba(255,181,46,.45)); }
+.topology-sleeper { stroke:#778493; stroke-width:.7; opacity:.55; }
+.topology-crossover { fill:none; stroke:#a9b5c1; stroke-width:1.4; opacity:.95; vector-effect:non-scaling-stroke; }
+.topology-crossover.secondary { stroke:#5c6978; }
+.topology-junction-ring { fill:#121e2b; stroke:#d5dde6; stroke-width:1.2; opacity:.9; }
+.topology-overpass { fill:none; stroke:#384653; stroke-width:12; opacity:.95; }
+.topology-overpass-rail { fill:none; stroke:#b5c0cb; stroke-width:1.8; vector-effect:non-scaling-stroke; }
+.topology-overpass-support { stroke:#677585; stroke-width:2; stroke-dasharray:3 3; }
+.topology-track-label,.topology-overpass-label,.topology-station-label { fill:#7f92a6; font-size:2.5px; font-weight:700; letter-spacing:.4px; }
+.topology-overpass-label { fill:#56a8ff; }
+.topology-station-node { fill:#162432; stroke:#72b4ff; stroke-width:.7; }
+.topology-station-line { stroke:#3f5265; stroke-width:1; stroke-dasharray:3 3; opacity:.65; }
+.topology-block-line { stroke:#516173; stroke-width:.45; stroke-dasharray:2 2; opacity:.45; }
+.topology-direction { fill:#8393a4; opacity:.65; }
+.rail-train { z-index:20; transition:left .1s linear, top .1s linear, filter .2s ease; }
+.rail-train.train-ai-controlled { filter:drop-shadow(0 0 8px rgba(71,171,255,.72)); }
+.train-ai-tag { position:absolute; top:-17px; left:50%; transform:translateX(-50%); padding:2px 4px; border-radius:3px; background:#193a5a; color:#8dccff; font-size:8px; font-weight:800; letter-spacing:.3px; white-space:nowrap; }
+.train-held .train-ai-tag { background:#5a4217; color:#ffd47a; }
+.ai-action-banner { margin-top:8px; padding:7px 10px; border:1px solid rgba(71,171,255,.25); background:rgba(25,58,90,.25); color:#9fd3ff; border-radius:5px; font-size:11px; opacity:0; transform:translateY(-4px); transition:opacity .2s, transform .2s; }
+.ai-action-banner.visible { opacity:1; transform:translateY(0); }
+
+
+/* Simple track map used by the stable simulator */
+.simple-railway-map { position: relative; overflow: hidden; }
+.simple-topology-svg { position:absolute; inset:0; width:100%; height:100%; z-index:1; pointer-events:none; }
+.simple-track-line { fill:none; stroke:#8f9cab; stroke-width:2.0; vector-effect:non-scaling-stroke; }
+.simple-track-line.occupied { stroke:#39d98a; filter:drop-shadow(0 0 4px rgba(57,217,138,.45)); }
+.simple-track-line.block-hot { stroke:#ffb84a; filter:drop-shadow(0 0 5px rgba(255,184,74,.45)); }
+.simple-rail-inner { stroke:#3f4c59; stroke-width:5; opacity:.8; vector-effect:non-scaling-stroke; }
+.simple-sleeper { stroke:#74818f; stroke-width:.7; opacity:.5; }
+.simple-switch { fill:none; stroke:#aeb8c3; stroke-width:1.5; opacity:.9; vector-effect:non-scaling-stroke; }
+.simple-switch.secondary { stroke:#687686; }
+.simple-station-line { stroke:#45576a; stroke-width:1; stroke-dasharray:3 3; opacity:.65; }
+.simple-station-node { fill:#182635; stroke:#77b9ff; stroke-width:.7; }
+.simple-track-label,.simple-station-label,.simple-map-note { fill:#8395a9; font-size:2.5px; font-weight:700; letter-spacing:.35px; }
+.simple-station-label { fill:#9bc9f5; }
+.simple-map-note { fill:#718398; font-size:2.2px; font-weight:500; }
+.simple-railway-map .rail-train { z-index:20; }
+
+/* ============================================================
+   LONG CORRIDOR PRESENTATION
+   Simple, wide section view inspired by the reference video.
+============================================================ */
+.simple-railway-map.long-corridor-map {
+    min-height: 390px;
+    height: 390px;
+    background:
+        radial-gradient(circle at 50% 46%, rgba(52, 132, 194, 0.05), transparent 55%),
+        linear-gradient(180deg, rgba(7, 17, 27, 0.2), rgba(7, 17, 27, 0.55));
+}
+
+.simple-railway-map.long-corridor-map .simple-topology-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.simple-railway-map.long-corridor-map .simple-track-line {
+    stroke: #617182;
+    stroke-width: 2.1;
+}
+
+.simple-railway-map.long-corridor-map .simple-track-line.occupied {
+    stroke: #2bd879;
+    filter: drop-shadow(0 0 5px rgba(43,216,121,.32));
+}
+
+.simple-railway-map.long-corridor-map .simple-track-line.block-hot {
+    stroke: #ffb93d;
+    filter: drop-shadow(0 0 6px rgba(255,185,61,.4));
+}
+
+.simple-railway-map.long-corridor-map .simple-rail-inner {
+    stroke: rgba(40, 53, 67, 0.92);
+    stroke-width: 5.4;
+}
+
+.simple-railway-map.long-corridor-map .simple-sleeper {
+    stroke: #8291a0;
+    stroke-width: .7;
+    opacity: .48;
+}
+
+.simple-railway-map.long-corridor-map .simple-block-line {
+    stroke: #516577;
+    stroke-width: .55;
+    stroke-dasharray: 2 2;
+    opacity: .4;
+}
+
+.simple-railway-map.long-corridor-map .simple-station-line {
+    stroke: #395063;
+    stroke-width: .9;
+    stroke-dasharray: 2.5 2.5;
+    opacity: .75;
+}
+
+.simple-railway-map.long-corridor-map .simple-station-node {
+    fill: #162635;
+    stroke: #67aefe;
+    stroke-width: .7;
+}
+
+.simple-railway-map.long-corridor-map .simple-track-label,
+.simple-railway-map.long-corridor-map .simple-track-subtitle {
+    fill: #8192a4;
+    font-size: 2.55px;
+    font-weight: 800;
+    letter-spacing: .36px;
+}
+
+.simple-railway-map.long-corridor-map .simple-track-subtitle {
+    fill: #617487;
+    font-size: 2.1px;
+    font-weight: 600;
+}
+
+.simple-railway-map.long-corridor-map .simple-station-label {
+    fill: #d9e6f2;
+    font-size: 3.1px;
+    font-weight: 900;
+    letter-spacing: .15px;
+}
+
+.simple-railway-map.long-corridor-map .simple-station-name {
+    fill: #7990a6;
+    font-size: 2px;
+    font-weight: 600;
+}
+
+.simple-railway-map.long-corridor-map .simple-map-header {
+    fill: #65d59a;
+    font-size: 2.4px;
+    font-weight: 800;
+    letter-spacing: .7px;
+}
+
+.simple-railway-map.long-corridor-map .simple-map-note {
+    fill: #687e92;
+    font-size: 1.8px;
+}
+
+/* Train card: label stays horizontal even when the train travels in reverse. */
+.simple-railway-map.long-corridor-map .rail-train {
+    width: 56px;
+    height: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 3px;
+    transform: none !important;
+    transition: left .08s linear, top .08s linear, filter .15s ease, opacity .15s ease;
+    will-change: left, top;
+    z-index: 30;
+}
+
+.simple-railway-map.long-corridor-map .rail-train:hover,
+.simple-railway-map.long-corridor-map .rail-train.selected-train {
+    transform: translateY(-2px) !important;
+}
+
+.simple-railway-map.long-corridor-map .train-label {
+    position: relative;
+    display: block;
+    order: 1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(5, 13, 21, .95);
+    border: 1px solid rgba(66, 217, 135, .34);
+    color: #e6f6ee;
+    font-size: 10px;
+    font-weight: 900;
+    line-height: 1;
+    white-space: nowrap;
+    text-align: center;
+    direction: ltr;
+    unicode-bidi: plaintext;
+    transform: none !important;
+}
+
+.simple-railway-map.long-corridor-map .train-body {
+    order: 2;
+    width: 34px;
+    height: 18px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #22d977;
+    color: #07130c;
+    box-shadow: 0 0 10px rgba(34, 217, 119, .28);
+}
+
+.simple-railway-map.long-corridor-map .train-body svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.5;
+    transition: transform .15s ease;
+}
+
+/* Only the locomotive icon flips. The label and AI tag never mirror. */
+.simple-railway-map.long-corridor-map .rail-train.reverse-running .train-body svg {
+    transform: scaleX(-1);
+}
+
+.simple-railway-map.long-corridor-map .train-held .train-body {
+    background: #ffb83d;
+    box-shadow: 0 0 10px rgba(255, 184, 61, .28);
+}
+
+.simple-railway-map.long-corridor-map .rail-train.conflict-train .train-body,
+.simple-railway-map.long-corridor-map .rail-train[data-conflict="true"] .train-body {
+    background: #ff4b4b;
+    color: #210707;
+    box-shadow: 0 0 11px rgba(255, 75, 75, .34);
+}
+
+.simple-railway-map.long-corridor-map .train-direction-dot {
+    position: absolute;
+    bottom: -1px;
+    width: 4px;
+    height: 4px;
+    border-radius: 999px;
+    background: #64b6ff;
+    box-shadow: 0 0 6px rgba(100, 182, 255, .45);
+}
+
+.simple-railway-map.long-corridor-map .train-ai-tag {
+    order: 3;
+    position: absolute;
+    top: 46px;
+    left: 50%;
+    transform: translateX(-50%) !important;
+    min-width: 28px;
+    padding: 2px 5px;
+    border-radius: 4px;
+    text-align: center;
+    background: #173c5f;
+    color: #9fd6ff;
+    font-size: 8px;
+    font-weight: 900;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.simple-railway-map.long-corridor-map .train-ai-tag[data-state="hold"] {
+    background: #5f4618;
+    color: #ffd477;
+}
+
+.simple-railway-map.long-corridor-map .train-ai-tag[data-state="go"] {
+    background: #164e31;
+    color: #7bf0ae;
+}
+
+@media (max-width: 900px) {
+    .simple-railway-map.long-corridor-map {
+        min-height: 340px;
+        height: 340px;
+    }
+    .simple-railway-map.long-corridor-map .rail-train {
+        transform: scale(.9) !important;
+        transform-origin: center bottom;
+    }
+}
+
+/* ============================================================
+   SECTION CORRIDOR — 2 MAIN TRACKS + SIMPLE JUNCTIONS
+============================================================ */
+.simple-railway-map.junction-corridor-map {
+    position: relative;
+    min-height: 360px;
+    height: 360px;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 50% 42%, rgba(52,132,194,.06), transparent 55%),
+        linear-gradient(180deg, rgba(7,17,27,.18), rgba(7,17,27,.62));
+}
+
+.junction-corridor-map .simple-topology-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.corridor-main-line { stroke: #68798a; stroke-width: 2.2; fill: none; vector-effect: non-scaling-stroke; }
+.corridor-main-line.occupied { stroke: #35dd86; filter: drop-shadow(0 0 5px rgba(53,221,134,.33)); }
+.corridor-main-line.block-hot { stroke: #ffb73c; filter: drop-shadow(0 0 6px rgba(255,183,60,.42)); }
+.corridor-inner-rail { stroke: rgba(38,52,66,.95); stroke-width: 5.6; vector-effect: non-scaling-stroke; }
+.corridor-sleeper { stroke: #8492a0; stroke-width: .72; opacity: .46; }
+.corridor-block { stroke: #53677a; stroke-width: .55; stroke-dasharray: 2 2; opacity: .5; }
+.corridor-junction { stroke: #aeb9c4; stroke-width: 1.7; fill: none; opacity: .96; vector-effect: non-scaling-stroke; }
+.corridor-junction-node { fill: #182937; stroke: #ffbd4b; stroke-width: .9; }
+.corridor-junction-label { fill: #e1edf6; font-size: 2.35px; font-weight: 900; letter-spacing: .35px; }
+.corridor-station-line { stroke: #3f5367; stroke-width: .9; stroke-dasharray: 2.5 2.5; opacity: .72; }
+.corridor-station-code { fill: #d9e6f2; font-size: 3.1px; font-weight: 900; letter-spacing: .12px; }
+.corridor-station-name { fill: #7e94a8; font-size: 2px; font-weight: 600; }
+.corridor-track-label { fill: #8ea0b2; font-size: 2.55px; font-weight: 900; letter-spacing: .38px; }
+.corridor-track-subtitle { fill: #64788b; font-size: 2px; font-weight: 700; }
+.corridor-header { fill: #66d69a; font-size: 2.35px; font-weight: 900; letter-spacing: .72px; }
+.corridor-footer { fill: #667d91; font-size: 1.9px; font-weight: 600; }
+
+.junction-corridor-map .simulated-train {
+    position: absolute;
+    width: 56px;
+    height: 48px;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 3px;
+    transform: none !important;
+    transition: left .06s linear, top .06s linear, filter .12s ease, opacity .12s ease;
+    will-change: left, top;
+}
+
+.junction-corridor-map .simulated-train .train-label {
+    position: relative;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(5,13,21,.96);
+    border: 1px solid rgba(66,217,135,.34);
+    color: #e7f7ef;
+    font-size: 10px;
+    font-weight: 900;
+    line-height: 1;
+    white-space: nowrap;
+    text-align: center;
+    direction: ltr;
+    unicode-bidi: plaintext;
+    transform: none !important;
+}
+
+.junction-corridor-map .simulated-train .train-body {
+    width: 36px;
+    height: 19px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #25d979;
+    color: #07130c;
+    box-shadow: 0 0 10px rgba(37,217,121,.28);
+}
+
+.junction-corridor-map .simulated-train .train-body svg { width: 18px; height: 18px; stroke-width: 2.5; }
+.junction-corridor-map .simulated-train.reverse-running .train-body svg { transform: scaleX(-1); }
+.junction-corridor-map .simulated-train.train-held .train-body { background: #ffb941; box-shadow: 0 0 10px rgba(255,185,65,.28); }
+.junction-corridor-map .simulated-train.train-ai-controlled { filter: drop-shadow(0 0 8px rgba(96,185,255,.7)); }
+.junction-corridor-map .simulated-train .train-ai-tag {
+    position: absolute;
+    top: 44px;
+    left: 50%;
+    transform: translateX(-50%) !important;
+    min-width: 28px;
+    padding: 2px 5px;
+    border-radius: 4px;
+    background: #173d60;
+    color: #9fd6ff;
+    font-size: 8px;
+    font-weight: 900;
+    text-align: center;
+    line-height: 1;
+    white-space: nowrap;
+}
+.junction-corridor-map .simulated-train .train-ai-tag[data-state="hold"] { background: #604818; color: #ffd77c; }
+.junction-corridor-map .simulated-train .train-ai-tag[data-state="go"] { background: #164e31; color: #7af1ac; }

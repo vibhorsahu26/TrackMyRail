@@ -1,0 +1,47 @@
+{
+  "description": "TrackMyRail normalized historical event schema",
+  "required_columns": {
+    "timestamp": "ISO-8601 event time",
+    "train_number": "string",
+    "train_name": "string",
+    "train_type": "Express, Passenger, Freight, Special, etc.",
+    "priority": "HIGH, MEDIUM, or LOW",
+    "current_station": "station code or name",
+    "next_station": "station code or name",
+    "section": "railway section identifier",
+    "scheduled_arrival": "ISO-8601 or HH:mm",
+    "actual_arrival": "ISO-8601 or HH:mm; blank when not arrived",
+    "scheduled_departure": "ISO-8601 or HH:mm",
+    "actual_departure": "ISO-8601 or HH:mm; blank when not departed",
+    "delay_minutes": "number",
+    "speed_kmh": "number",
+    "distance_remaining_km": "number",
+    "track": "track or block identifier",
+    "track_occupancy": "number from 0 to 1",
+    "platform": "platform identifier; blank when not applicable",
+    "platform_available": "0 or 1",
+    "signal_status": "GREEN, YELLOW, RED, or BLOCKED",
+    "weather_risk": "0 normal, 1 warning, 2 high",
+    "hour": "0 to 23",
+    "target_delay_minutes": "number; observed future delay used for regression",
+    "conflict_occurred": "0 or 1; observed conflict label used for classification"
+  },
+  "optional_columns": {
+    "latitude": "number",
+    "longitude": "number",
+    "direction": "FORWARD or REVERSE",
+    "disruption_type": "string",
+    "conflict_id": "string",
+    "resolution_action": "string",
+    "total_delay_after_resolution": "number",
+    "controller_decision": "string"
+  },
+  "minimum_quality": {
+    "minimum_rows": 100,
+    "recommended_rows": 10000,
+    "minimum_history": "3 months",
+    "recommended_history": "6 to 12 months",
+    "conflict_labels": "must contain both 0 and 1",
+    "target_delay": "must be measured after the prediction timestamp"
+  }
+}
