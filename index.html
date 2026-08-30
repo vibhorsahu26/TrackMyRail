@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="./css/style.css">
 
     <link rel="stylesheet" href="./css/railway.css">
+    <link rel="stylesheet" href="./css/simple_sim.css">
 
 
     <!-- =====================================================
@@ -27,6 +28,28 @@
 
     <script src="https://unpkg.com/lucide@latest"></script>
 
+
+<style>
+.train-logs-panel{margin-top:16px;}
+.history-panel{margin-top:16px;}
+.speed-auto-note{font-size:10px;color:#ffbd3b;font-weight:700;min-width:64px;text-align:center;}
+.speed-button.auto-conflict-speed{box-shadow:0 0 0 1px rgba(255,189,59,.8),0 0 14px rgba(255,189,59,.18);color:#ffbd3b;}
+.logs-caption{font-size:12px;color:#7f91a6;}
+.train-departure-logs{display:flex;flex-direction:column;gap:8px;padding:4px 0;}
+.train-log-row{display:grid;grid-template-columns:72px 78px 1.2fr 1.2fr 74px;gap:10px;align-items:center;padding:10px 12px;border:1px solid rgba(126,150,174,.12);background:rgba(12,25,37,.6);border-radius:8px;font-size:12px;color:#c9d6e2;}
+.train-log-row strong{color:#fff;}
+.train-log-time{color:#7f91a6;font-variant-numeric:tabular-nums;}
+.train-log-delay{color:#49d58a;font-weight:700;}
+.train-log-delay.late{color:#ffbd3b;}
+.train-log-empty{padding:16px;color:#7f91a6;font-size:12px;border:1px dashed rgba(126,150,174,.18);border-radius:8px;}
+.scenario-card.disabled{opacity:.55;pointer-events:none;}
+.scenario-card.selected{outline:2px solid rgba(36,208,111,.55);outline-offset:-2px;}
+@media (max-width:900px){.train-log-row{grid-template-columns:64px 70px 1fr;}.train-log-row span:nth-child(4){display:none;}.train-log-row span:nth-child(5){justify-self:end;}}
+</style>
+
+<style>
+.utility-page-panel{margin-top:16px}.utility-page-content{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.utility-card{border:1px solid rgba(140,160,190,.18);border-radius:12px;padding:14px;background:rgba(12,18,28,.55)}.utility-card h3{margin:0 0 7px;font-size:14px}.utility-card p{margin:0;color:#94a3b8;font-size:12px;line-height:1.5}.utility-metric{font-size:22px;font-weight:700;margin-top:5px}.utility-pill{display:inline-block;margin-top:8px;padding:4px 8px;border-radius:999px;background:rgba(64,180,120,.12);color:#63d39a;font-size:10px;font-weight:700;letter-spacing:.04em}.utility-table{width:100%;border-collapse:collapse;font-size:12px}.utility-table td,.utility-table th{padding:8px 6px;border-bottom:1px solid rgba(140,160,190,.12);text-align:left}.utility-table th{color:#7f91a6;font-weight:600}.utility-action{margin-top:10px;padding:8px 10px;border:1px solid rgba(140,160,190,.22);border-radius:8px;background:rgba(255,255,255,.03);color:inherit;cursor:pointer}.utility-action:hover{background:rgba(255,255,255,.08)}
+</style>
 </head>
 
 
@@ -75,11 +98,11 @@
 
             <!-- SYSTEM STATUS -->
 
-            <div class="system-status">
+            <div class="system-status" id="systemStatus" title="Live data connection status">
 
-                <span class="status-dot"></span>
+                <span class="status-dot" id="systemStatusDot"></span>
 
-                <span>
+                <span id="systemStatusText">
                     System Online
                 </span>
 
@@ -173,6 +196,38 @@
 
         <main class="dashboard">
 
+            <section class="dashboard-toolbar" aria-label="Traffic data controls">
+
+                <div class="toolbar-search">
+                    <i data-lucide="search"></i>
+                    <input id="trainSearch" type="search" placeholder="Search train number or name" autocomplete="off">
+                </div>
+
+                <label class="toolbar-filter">
+                    <span>Status</span>
+                    <select id="statusFilter">
+                        <option value="ALL">All trains</option>
+                        <option value="RUNNING">Running</option>
+                        <option value="DELAYED">Delayed</option>
+                        <option value="AT_STATION">At station</option>
+                    </select>
+                </label>
+
+                <div class="mode-switch" role="group" aria-label="Data mode">
+                    <button class="mode-button active" data-mode="SIMULATION">Simulation</button>
+                    <button class="mode-button" data-mode="LIVE">Live</button>
+                </div>
+
+                <div class="freshness-status">
+                    <span class="freshness-dot" id="freshnessDot"></span>
+                    <span id="dataFreshness">Simulation data</span>
+                    <button class="icon-button refresh-button" id="refreshDataButton" title="Refresh railway data" aria-label="Refresh railway data">
+                        <i data-lucide="refresh-cw"></i>
+                    </button>
+                </div>
+
+            </section>
+
 
             <!-- =============================================
                  ACTIVE TRAINS
@@ -187,19 +242,13 @@
 
                         <h2>
                             ACTIVE TRAINS
-                            <span>(6)</span>
+                            <span>(0–6)</span>
                         </h2>
 
                     </div>
 
 
-                    <button class="primary-button">
 
-                        <i data-lucide="plus"></i>
-
-                        Add Train
-
-                    </button>
 
                 </div>
 
@@ -681,7 +730,7 @@
 
                         <div>
                             <strong>SIMULATION</strong>
-                            <span id="simulationStatusText">Running</span>
+                            <span id="simulationStatusText">Paused</span>
                         </div>
 
                     </div>
@@ -713,7 +762,13 @@
 
                         <span>Speed</span>
 
-                        <button class="speed-button active" data-speed="1">
+                        <span class="speed-auto-note" aria-live="polite"></span>
+
+                        <button class="speed-button" data-speed="0.5">
+                            0.5×
+                        </button>
+
+                        <button class="speed-button" data-speed="1">
                             1×
                         </button>
 
@@ -721,11 +776,312 @@
                             5×
                         </button>
 
-                        <button class="speed-button" data-speed="10">
+                        <button class="speed-button active" data-speed="10">
                             10×
                         </button>
 
+                        <button class="speed-button" data-speed="20">
+                            20×
+                        </button>
+
                     </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =============================================
+                 WHAT IF ANALYSIS
+            ============================================== -->
+
+            <section class="panel what-if-panel">
+
+
+                <div class="panel-header">
+
+                    <h2>
+                        WHAT-IF ANALYSIS
+                    </h2>
+
+
+                    <button class="text-button">
+                        Compare Scenarios
+                    </button>
+
+                </div>
+
+
+
+                <div class="scenario-grid">
+
+                    <div class="scenario-actions">
+
+                        <div class="selected-scenario">
+
+                            <span>Selected Scenario</span>
+
+                            <strong id="selectedScenarioText">
+                                Scenario 1: 12951 First
+                            </strong>
+
+                        </div>
+
+                        <button id="applyScenarioButton" class="primary-button">
+                            <i data-lucide="play"></i>
+                            Apply Scenario
+                        </button>
+
+                    </div>
+
+                    <!-- SCENARIO 1 -->
+
+                    <article class="scenario-card recommended" data-scenario="AI_RECOMMENDED">
+
+
+                        <div class="scenario-header">
+
+                            <strong id="scenario1Title">
+                                Scenario 1: 12951 First
+                            </strong>
+
+                            <span id="scenario1Badge">
+                                RECOMMENDED
+                            </span>
+
+                        </div>
+
+
+
+                        <div class="scenario-content">
+
+
+                            <div>
+
+                                <span>
+                                    Total Delay
+                                </span>
+
+                                <strong class="success" id="scenario1Delay">
+                                    14 min
+                                </strong>
+
+                            </div>
+
+
+                            <div class="scenario-stats">
+
+                                <span>
+
+                                    Conflicts
+
+                                    <b id="scenario1Conflicts">
+                                        1
+                                    </b>
+
+                                </span>
+
+
+                                <span>
+
+                                    Stops
+
+                                    <b id="scenario1Stops">
+                                        1
+                                    </b>
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="scenario-track">
+
+                            <div class="scenario-train green"></div>
+
+                            <div class="scenario-node"></div>
+
+                            <div class="scenario-train red"></div>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- SCENARIO 2 -->
+
+                    <article class="scenario-card" data-scenario="OTHER_FIRST">
+
+
+                        <div class="scenario-header">
+
+                            <strong id="scenario2Title">
+                                Scenario 2: 54821 First
+                            </strong>
+
+                        </div>
+
+
+
+                        <div class="scenario-content">
+
+
+                            <div>
+
+                                <span>
+                                    Total Delay
+                                </span>
+
+                                <strong class="danger" id="scenario2Delay">
+                                    31 min
+                                </strong>
+
+                            </div>
+
+
+                            <div class="scenario-stats">
+
+                                <span>
+
+                                    Conflicts
+
+                                    <b id="scenario2Conflicts">
+                                        2
+                                    </b>
+
+                                </span>
+
+
+                                <span>
+
+                                    Stops
+
+                                    <b id="scenario2Stops">
+                                        2
+                                    </b>
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="scenario-track">
+
+                            <div class="scenario-train red"></div>
+
+                            <div class="scenario-node"></div>
+
+                            <div class="scenario-train green"></div>
+
+                        </div>
+
+                    </article>
+
+
+
+                    <!-- SCENARIO 3 -->
+
+                    <article class="scenario-card" data-scenario="SLOW_APPROACH">
+
+
+                        <div class="scenario-header">
+
+                            <strong id="scenario3Title">
+                                Slow approaching train
+                            </strong>
+
+                        </div>
+
+
+
+                        <div class="scenario-content">
+
+
+                            <div>
+
+                                <span>
+                                    Total Delay
+                                </span>
+
+                                <strong class="warning" id="scenario3Delay">
+                                    -- min
+                                </strong>
+
+                            </div>
+
+
+                            <div class="scenario-stats">
+
+                                <span>
+
+                                    Conflicts
+
+                                    <b id="scenario3Conflicts">
+                                        --
+                                    </b>
+
+                                </span>
+
+
+                                <span>
+
+                                    Stops
+
+                                    <b id="scenario3Stops">
+                                        --
+                                    </b>
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="scenario-track">
+
+                            <div class="scenario-train white"></div>
+
+                            <div class="scenario-node"></div>
+
+                            <div class="scenario-train yellow"></div>
+
+                        </div>
+
+                    </article>
+
+                    <!-- SCENARIO 4 -->
+
+                    <article class="scenario-card" data-scenario="HOLD_BOTH">
+                        <div class="scenario-header">
+                            <strong id="scenario4Title">Hold both trains briefly</strong>
+                            <span>ALTERNATIVE</span>
+                        </div>
+                        <div class="scenario-content">
+                            <div>
+                                <span>Total Delay</span>
+                                <strong class="warning" id="scenario4Delay">-- min</strong>
+                            </div>
+                            <div class="scenario-stats">
+                                <span>Conflicts <b id="scenario4Conflicts">--</b></span>
+                                <span>Stops <b id="scenario4Stops">--</b></span>
+                            </div>
+                        </div>
+                        <div class="scenario-track">
+                            <div class="scenario-train yellow"></div>
+                            <div class="scenario-node"></div>
+                            <div class="scenario-train yellow"></div>
+                        </div>
+                    </article>
 
                 </div>
 
@@ -747,6 +1103,8 @@
                     </h2>
 
                 </div>
+
+                <div id="aiActionBanner" class="ai-action-banner" aria-live="polite"></div>
 
 
 
@@ -963,276 +1321,32 @@
 
                 </div>
 
-            </section>
+                <div class="ml-forecast" aria-live="polite">
 
-
-
-            <!-- =============================================
-                 WHAT IF ANALYSIS
-            ============================================== -->
-
-            <section class="panel what-if-panel">
-
-
-                <div class="panel-header">
-
-                    <h2>
-                        WHAT-IF ANALYSIS
-                    </h2>
-
-
-                    <button class="text-button">
-                        Compare Scenarios
-                    </button>
-
-                </div>
-
-
-
-                <div class="scenario-grid">
-
-                    <div class="scenario-actions">
-
-                        <div class="selected-scenario">
-
-                            <span>Selected Scenario</span>
-
-                            <strong id="selectedScenarioText">
-                                Scenario 1: 12951 First
-                            </strong>
-
+                    <div class="ml-forecast-header">
+                        <div>
+                            <h3>ML TRAFFIC FORECAST</h3>
+                            <span id="mlModelSource">Synthetic prototype data</span>
                         </div>
-
-                        <button id="applyScenarioButton" class="primary-button">
-                            <i data-lucide="play"></i>
-                            Apply Scenario
-                        </button>
-
+                        <span class="ml-model-badge" id="mlModelBadge">KNN</span>
                     </div>
 
-                    <!-- SCENARIO 1 -->
-
-                    <article class="scenario-card recommended" data-scenario="12951_FIRST">
-
-
-                        <div class="scenario-header">
-
-                            <strong id="scenario1Title">
-                                Scenario 1: 12951 First
-                            </strong>
-
-                            <span id="scenario1Badge">
-                                RECOMMENDED
-                            </span>
-
+                    <div class="ml-forecast-grid">
+                        <div>
+                            <span>Predicted Delay</span>
+                            <strong id="mlPredictedDelay">-- min</strong>
                         </div>
-
-
-
-                        <div class="scenario-content">
-
-
-                            <div>
-
-                                <span>
-                                    Total Delay
-                                </span>
-
-                                <strong class="success" id="scenario1Delay">
-                                    14 min
-                                </strong>
-
-                            </div>
-
-
-                            <div class="scenario-stats">
-
-                                <span>
-
-                                    Conflicts
-
-                                    <b id="scenario1Conflicts">
-                                        1
-                                    </b>
-
-                                </span>
-
-
-                                <span>
-
-                                    Stops
-
-                                    <b id="scenario1Stops">
-                                        1
-                                    </b>
-
-                                </span>
-
-                            </div>
-
+                        <div>
+                            <span>Conflict Risk</span>
+                            <strong id="mlConflictRisk">--</strong>
                         </div>
-
-
-
-                        <div class="scenario-track">
-
-                            <div class="scenario-train green"></div>
-
-                            <div class="scenario-node"></div>
-
-                            <div class="scenario-train red"></div>
-
+                        <div>
+                            <span>Confidence</span>
+                            <strong id="mlConfidence">--%</strong>
                         </div>
+                    </div>
 
-                    </article>
-
-
-
-                    <!-- SCENARIO 2 -->
-
-                    <article class="scenario-card" data-scenario="54821_FIRST">
-
-
-                        <div class="scenario-header">
-
-                            <strong id="scenario2Title">
-                                Scenario 2: 54821 First
-                            </strong>
-
-                        </div>
-
-
-
-                        <div class="scenario-content">
-
-
-                            <div>
-
-                                <span>
-                                    Total Delay
-                                </span>
-
-                                <strong class="danger" id="scenario2Delay">
-                                    31 min
-                                </strong>
-
-                            </div>
-
-
-                            <div class="scenario-stats">
-
-                                <span>
-
-                                    Conflicts
-
-                                    <b id="scenario2Conflicts">
-                                        2
-                                    </b>
-
-                                </span>
-
-
-                                <span>
-
-                                    Stops
-
-                                    <b id="scenario2Stops">
-                                        2
-                                    </b>
-
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-
-                        <div class="scenario-track">
-
-                            <div class="scenario-train red"></div>
-
-                            <div class="scenario-node"></div>
-
-                            <div class="scenario-train green"></div>
-
-                        </div>
-
-                    </article>
-
-
-
-                    <!-- SCENARIO 3 -->
-
-                    <article class="scenario-card" data-scenario="HOLD_BOTH">
-
-
-                        <div class="scenario-header">
-
-                            <strong id="scenario3Title">
-                                Scenario 3: Hold Both
-                            </strong>
-
-                        </div>
-
-
-
-                        <div class="scenario-content">
-
-
-                            <div>
-
-                                <span>
-                                    Total Delay
-                                </span>
-
-                                <strong class="warning" id="scenario3Delay">
-                                    19 min
-                                </strong>
-
-                            </div>
-
-
-                            <div class="scenario-stats">
-
-                                <span>
-
-                                    Conflicts
-
-                                    <b id="scenario3Conflicts">
-                                        1
-                                    </b>
-
-                                </span>
-
-
-                                <span>
-
-                                    Stops
-
-                                    <b id="scenario3Stops">
-                                        2
-                                    </b>
-
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-
-                        <div class="scenario-track">
-
-                            <div class="scenario-train white"></div>
-
-                            <div class="scenario-node"></div>
-
-                            <div class="scenario-train yellow"></div>
-
-                        </div>
-
-                    </article>
+                    <p id="mlForecastNote">Forecast supports the recommendation; controller approval remains required.</p>
 
                 </div>
 
@@ -1363,6 +1477,34 @@
 
             </section>
 
+
+
+            <!-- =============================================
+                 HISTORY TAB CONTENT
+            ============================================== -->
+
+            <section class="panel utility-page-panel" id="utilityPagePanel" hidden>
+                <div class="panel-header">
+                    <div>
+                        <h2 id="utilityPageTitle">TRACKS</h2>
+                        <span class="logs-caption" id="utilityPageSubtitle">Live section tools</span>
+                    </div>
+                </div>
+                <div id="utilityPageContent" class="utility-page-content"></div>
+            </section>
+
+
+            <section class="panel history-panel" id="historyPanel" hidden>
+                <div class="panel-header">
+                    <h2>HISTORY</h2>
+                    <span class="logs-caption">Last 7 completed trains</span>
+                </div>
+                <div id="trainDepartureLogs" class="train-departure-logs" aria-live="polite">
+                    <div class="train-log-empty">No completed trains yet. Departures will appear here.</div>
+                </div>
+            </section>
+
+
         </main>
 
 
@@ -1374,7 +1516,7 @@
         <nav class="bottom-nav">
 
 
-            <button class="nav-item active">
+            <button class="nav-item active" data-nav="dashboard">
 
                 <i data-lucide="layout-dashboard"></i>
 
@@ -1386,7 +1528,7 @@
 
 
 
-            <button class="nav-item">
+            <button class="nav-item" data-nav="trains">
 
                 <i data-lucide="train-front"></i>
 
@@ -1398,7 +1540,7 @@
 
 
 
-            <button class="nav-item">
+            <button class="nav-item" data-nav="section">
 
                 <i data-lucide="route"></i>
 
@@ -1410,7 +1552,7 @@
 
 
 
-            <button class="nav-item">
+            <button class="nav-item" data-nav="schedule">
 
                 <i data-lucide="calendar-days"></i>
 
@@ -1422,7 +1564,7 @@
 
 
 
-            <button class="nav-item">
+            <button class="nav-item" data-nav="disruptions">
 
                 <i data-lucide="triangle-alert"></i>
 
@@ -1434,7 +1576,7 @@
 
 
 
-            <button class="nav-item">
+            <button class="nav-item" data-nav="reports">
 
                 <i data-lucide="file-text"></i>
 
@@ -1446,7 +1588,7 @@
 
 
 
-            <button class="nav-item">
+            <button class="nav-item" data-nav="history">
 
                 <i data-lucide="history"></i>
 
@@ -1472,9 +1614,13 @@
         depends on railwayState.
     -->
 
+    <script src="./config.js"></script>
+    <script src="./js/mlModel.js"></script>
+
     <script src="./js/railwayData.js"></script>
 
     <script src="./js/railway.js"></script>
+    <script src="./js/sim_override.js"></script>
 
     <script src="./js/app.js"></script>
 
